@@ -37,12 +37,14 @@ const experiences = [
   },
 ];
 
+import { FadeIn } from "@/components/common/fade-in";
+
 export const BookingExperiences = () => {
   return (
     <section className="bg-bg-light py-16 lg:py-24">
       <div className="mx-auto max-w-[1440px] px-5 md:px-10">
         {/* Header: description left, title right */}
-        <div className="mb-10 flex flex-col gap-6 lg:mb-14 lg:flex-row lg:items-end lg:justify-between">
+        <FadeIn className="mb-10 flex flex-col gap-6 lg:mb-14 lg:flex-row lg:items-end lg:justify-between">
           <p className="max-w-[300px] text-[1rem] leading-relaxed text-text-muted-dark">
             Designed to make every booking seamless, every game memorable, and every venue accessible.
           </p>
@@ -51,15 +53,15 @@ export const BookingExperiences = () => {
             <br />
             & Experiences
           </h2>
-        </div>
+        </FadeIn>
 
         {/* Cards grid */}
         <div className="rounded-3xl border-2 border-section-dark p-3 md:p-4">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
             {experiences.map((exp, i) => (
+              <FadeIn key={i} delay={i * 0.15}>
               <div
-                key={i}
-                className="flex flex-col rounded-2xl bg-white p-6 md:p-7"
+                className="flex h-full flex-col rounded-2xl bg-white p-6 md:p-7"
               >
                 {/* Icon + Title */}
                 <div className="mb-4 flex items-center gap-3">
@@ -87,6 +89,7 @@ export const BookingExperiences = () => {
                   </div>
                 </div>
               </div>
+              </FadeIn>
             ))}
           </div>
         </div>

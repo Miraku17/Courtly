@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { FadeIn } from "@/components/common/fade-in";
 
 const tags = ["Free Listing", "Smart Dashboard", "Instant Payouts"];
 
@@ -16,6 +17,7 @@ export const VenuePromo = () => {
         {/* Top: Image + Text */}
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
           {/* Image */}
+          <FadeIn direction="left">
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl lg:aspect-auto lg:h-[520px]">
             <Image
               src="/why_join_us.png"
@@ -24,9 +26,10 @@ export const VenuePromo = () => {
               className="object-cover"
             />
           </div>
+          </FadeIn>
 
           {/* Text content */}
-          <div>
+          <FadeIn direction="right" delay={0.2}>
             <h2 className="mb-6 text-[2.2rem] uppercase text-text-dark md:text-[2.8rem] lg:text-[3.5rem]">
               Grow Your Venue With Courtly
             </h2>
@@ -74,15 +77,15 @@ export const VenuePromo = () => {
                 </svg>
               </span>
             </button>
-          </div>
+          </FadeIn>
         </div>
 
         {/* Bottom stats row */}
         <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4 lg:mt-14">
-          {stats.map((s) => (
+          {stats.map((s, i) => (
+            <FadeIn key={s.label} delay={i * 0.1}>
             <div
-              key={s.label}
-              className="flex flex-col rounded-2xl bg-section-dark p-5 md:p-6"
+              className="flex h-full flex-col rounded-2xl bg-section-dark p-5 md:p-6"
             >
               <div className="mb-4 flex items-center justify-between">
                 <p className="text-[0.85rem] font-medium text-text-muted">{s.label} {s.sublabel}</p>
@@ -98,6 +101,7 @@ export const VenuePromo = () => {
                 <span className="text-[1.2rem]">{s.suffix}</span>
               </p>
             </div>
+            </FadeIn>
           ))}
         </div>
       </div>

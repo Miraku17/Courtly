@@ -1,3 +1,5 @@
+import { FadeIn } from "@/components/common/fade-in";
+
 export const HowItWorks = () => {
   const playerSteps = [
     { step: "01", title: "Search Courts", description: "Browse venues near you filtered by sport, location, and amenities." },
@@ -16,7 +18,7 @@ export const HowItWorks = () => {
     <section id="how-it-works" className="bg-section-dark py-20 text-text-main lg:py-28">
       <div className="mx-auto max-w-[1440px] px-5 md:px-10">
         {/* Header */}
-        <div className="mb-16 text-center lg:mb-20">
+        <FadeIn className="mb-16 text-center lg:mb-20">
           <p className="mb-3 text-[0.85rem] font-semibold uppercase tracking-[0.15em] text-primary">
             How It Works
           </p>
@@ -26,12 +28,12 @@ export const HowItWorks = () => {
           <p className="mx-auto max-w-[520px] text-[1.05rem] leading-relaxed text-text-muted">
             Whether you&apos;re looking for a court or listing your venue, the process is effortless.
           </p>
-        </div>
+        </FadeIn>
 
         {/* Two columns */}
         <div className="flex flex-col gap-16 lg:flex-row lg:gap-20">
           {/* For Players */}
-          <div className="flex-1">
+          <FadeIn direction="left" className="flex-1">
             <div className="mb-8 flex items-center gap-3">
               <div className="h-px flex-1 bg-primary/30" />
               <h3 className="shrink-0 text-[0.85rem] font-bold uppercase tracking-[0.12em] text-primary">
@@ -60,13 +62,13 @@ export const HowItWorks = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </FadeIn>
 
           {/* Divider */}
           <div className="h-px w-full bg-white/10 lg:h-auto lg:w-px" />
 
           {/* For Owners */}
-          <div className="flex-1">
+          <FadeIn direction="right" className="flex-1">
             <div className="mb-8 flex items-center gap-3">
               <div className="h-px flex-1 bg-primary/30" />
               <h3 className="shrink-0 text-[0.85rem] font-bold uppercase tracking-[0.12em] text-primary">
@@ -95,7 +97,7 @@ export const HowItWorks = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </FadeIn>
         </div>
       </div>
     </section>
