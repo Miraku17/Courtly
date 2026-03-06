@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TennisBallScene } from "@/components/three/tennis-ball-scene";
 
 const socials = [
   { name: "Instagram", href: "#" },
@@ -148,23 +149,19 @@ export const Footer = () => {
             </ul>
           </div>
 
-          {/* Right column — Decorative image */}
+          {/* Right column — 3D Tennis Ball */}
           <div className="hidden lg:block">
             <div className="relative h-[320px] w-full overflow-hidden rounded-2xl bg-[#2c452c]">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <p
-                    className="mb-2 text-[1.4rem] italic text-[#ffffff] opacity-90"
-                    style={{ fontFamily: "var(--font-heading), cursive" }}
-                  >
-                    Serving <span className="text-primary">You</span> Always
-                  </p>
-                  <div className="mx-auto mt-6 grid grid-cols-3 gap-3">
-                    {[...Array(6)].map((_, i) => (
-                      <div key={i} className="size-[50px] rounded-full bg-primary/30" />
-                    ))}
-                  </div>
-                </div>
+              <div className="absolute inset-0">
+                <TennisBallScene />
+              </div>
+              <div className="pointer-events-none absolute inset-x-0 bottom-4 z-10 text-center">
+                <p
+                  className="text-[1.4rem] italic text-[#ffffff] opacity-90"
+                  style={{ fontFamily: "var(--font-heading), sans-serif" }}
+                >
+                  Serving <span className="text-primary">You</span> Always
+                </p>
               </div>
             </div>
           </div>

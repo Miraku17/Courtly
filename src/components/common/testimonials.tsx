@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { FadeIn } from "@/components/common/fade-in";
 
 const testimonials = [
   {
@@ -32,7 +33,7 @@ export const Testimonials = () => {
         {/* Layout: title left, cards right */}
         <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[0.8fr_1fr] lg:gap-16">
           {/* Left — sticky title */}
-          <div className="lg:sticky lg:top-24">
+          <FadeIn direction="left" className="lg:sticky lg:top-24">
             <p className="mb-3 text-[0.85rem] font-semibold uppercase tracking-[0.15em] text-section-dark">
               Testimonials
             </p>
@@ -45,13 +46,13 @@ export const Testimonials = () => {
               <div className="size-3 rounded-full bg-section-dark" />
               <div className="size-3 rounded-full bg-primary" />
             </div>
-          </div>
+          </FadeIn>
 
           {/* Right — testimonial cards */}
           <div className="flex flex-col gap-6">
             {testimonials.map((t, i) => (
+              <FadeIn key={i} direction="right" delay={i * 0.2}>
               <div
-                key={i}
                 className="rounded-2xl border border-text-dark/[0.06] bg-white p-6 transition-all duration-300 hover:shadow-[0_12px_30px_rgba(0,0,0,0.08)] md:p-8"
               >
                 {/* Top: avatar + name + rating */}
@@ -85,6 +86,7 @@ export const Testimonials = () => {
                   </p>
                 </div>
               </div>
+              </FadeIn>
             ))}
           </div>
         </div>

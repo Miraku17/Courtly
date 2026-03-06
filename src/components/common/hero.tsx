@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { FadeIn } from "@/components/common/fade-in";
 
 export const Hero = () => {
   return (
@@ -21,23 +22,30 @@ export const Hero = () => {
 
       <div className="relative z-[2] mx-auto grid w-full max-w-[1440px] items-center gap-[60px] text-center lg:grid-cols-[1.1fr_1fr] lg:text-left">
         <div className="flex flex-col items-center lg:items-start">
-          <div className="mb-6 inline-flex items-center rounded-full bg-[#1b2e1b] px-4 py-2 text-[0.9rem] font-semibold text-primary">
-            Experience the Courtly Lifestyle 🎾
-          </div>
+          <FadeIn delay={0.1}>
+            <div className="mb-6 inline-flex items-center rounded-full bg-[#1b2e1b] px-4 py-2 text-[0.9rem] font-semibold text-primary">
+              Experience the Courtly Lifestyle 🎾
+            </div>
+          </FadeIn>
 
-          <h1 className="mb-6 text-[3rem] text-text-main sm:text-[4rem] lg:text-[5.5rem]">
-            MORE THAN A <span className="text-primary">COURT</span>
-            <br />
-            <span className="mr-2.5 mb-[15px] hidden h-2.5 w-[60px] bg-text-main align-middle lg:inline-block" />
-            IT&apos;S A LIFESTYLE
-          </h1>
+          <FadeIn delay={0.2}>
+            <h1 className="mb-6 text-[3rem] text-text-main sm:text-[4rem] lg:text-[5.5rem]">
+              MORE THAN A <span className="text-primary">COURT</span>
+              <br />
+              <span className="mr-2.5 mb-[15px] hidden h-2.5 w-[60px] bg-text-main align-middle lg:inline-block" />
+              IT&apos;S A LIFESTYLE
+            </h1>
+          </FadeIn>
 
-          <p className="mb-10 max-w-[500px] text-[1.1rem] leading-relaxed text-text-muted">
-            Reach more players, manage bookings effortlessly, and grow your
-            sports venue — all from one free platform.
-          </p>
+          <FadeIn delay={0.3}>
+            <p className="mb-10 max-w-[500px] text-[1.1rem] leading-relaxed text-text-muted">
+              Reach more players, manage bookings effortlessly, and grow your
+              sports venue — all from one free platform.
+            </p>
+          </FadeIn>
 
-          <div className="flex flex-wrap justify-center gap-4 lg:justify-start">
+          <FadeIn delay={0.4}>
+            <div className="flex flex-wrap justify-center gap-4 lg:justify-start">
             <button className="flex items-center gap-3 rounded-full bg-primary px-6 py-3 font-semibold text-text-dark transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-hover">
               Explore Courts
               <span className="flex size-8 items-center justify-center rounded-full bg-white">
@@ -56,8 +64,10 @@ export const Hero = () => {
               Take a Tour
             </button>
           </div>
+          </FadeIn>
         </div>
 
+        <FadeIn direction="right" delay={0.3}>
         <div className="relative w-full">
           <div className="relative w-full pb-[70%] lg:pb-[110%]">
             <Image
@@ -87,6 +97,7 @@ export const Hero = () => {
             </div>
           </div>
         </div>
+        </FadeIn>
       </div>
     </section>
   );

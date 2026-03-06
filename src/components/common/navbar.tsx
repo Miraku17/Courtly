@@ -1,6 +1,29 @@
+"use client";
+
 import Link from "next/link";
+import { useState, useRef, useEffect } from "react";
+
+const menuLinks = [
+  { name: "My Bookings", href: "/dashboard/bookings" },
+  { name: "My Venues", href: "/dashboard/venues" },
+  { name: "Settings", href: "/dashboard/settings" },
+  { name: "Sign Out", href: "/signout" },
+];
 
 export const Navbar = () => {
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <nav className="relative z-50 bg-bg-dark px-10 py-[30px]">
       <div className="mx-auto flex max-w-[1440px] items-center justify-between">
@@ -24,7 +47,7 @@ export const Navbar = () => {
         <Link
           href="/"
           className="flex flex-1 items-center gap-3 text-[1.8rem] uppercase text-[#ffffff] lg:justify-center"
-          style={{ fontFamily: "var(--font-heading), cursive" }}
+          style={{ fontFamily: "var(--font-heading), sans-serif" }}
         >
           <span className="flex items-center">
             <svg
@@ -47,22 +70,54 @@ export const Navbar = () => {
           >
             LET&apos;S TALK
           </Link>
-          <button className="flex size-12 items-center justify-center rounded-full bg-primary transition-all duration-300 hover:scale-105 hover:bg-primary-hover">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#1a1a1a"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+
+          {/* Menu Button + Dropdown */}
+          <div ref={dropdownRef} className="relative">
+            <button
+              onClick={() => setOpen(!open)}
+              className="flex size-12 items-center justify-center rounded-full bg-primary transition-all duration-300 hover:scale-105 hover:bg-primary-hover"
             >
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
-          </button>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#1a1a1a"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={`transition-transform duration-300 ${open ? "rotate-90" : ""}`}
+              >
+                {open ? (
+                  <>
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </>
+                ) : (
+                  <>
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                  </>
+                )}
+              </svg>
+            </button>
+
+            {open && (
+              <div className="absolute right-0 top-full mt-3 min-w-[200px] overflow-hidden rounded-xl border border-white/10 bg-bg-dark shadow-[0_16px_40px_rgba(0,0,0,0.4)]">
+                {menuLinks.map((link) => (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setOpen(false)}
+                    className="flex items-center px-5 py-3 text-[0.9rem] text-[#ffffff] transition-all duration-200 hover:bg-white/[0.08] hover:text-primary"
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </nav>

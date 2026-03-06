@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
-import { Inter, Lilita_One } from "next/font/google";
+import { Plus_Jakarta_Sans, Outfit } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+const plusJakarta = Plus_Jakarta_Sans({
+  variable: "--font-body",
   subsets: ["latin"],
 });
 
-const lilitaOne = Lilita_One({
+const outfit = Outfit({
   variable: "--font-heading",
-  weight: "400",
   subsets: ["latin"],
 });
 
@@ -25,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${lilitaOne.variable}`}>
+      <body className={`${plusJakarta.variable} ${outfit.variable}`}>
         {children}
       </body>
     </html>
