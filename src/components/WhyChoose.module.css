@@ -1,0 +1,223 @@
+.whyChoose {
+  background-color: var(--bg-inner);
+  padding: 140px 0 100px 80px; /* Increased padding for thicker bars */
+  position: relative;
+  overflow: hidden;
+}
+
+/* Vertical Bar */
+.leftBar {
+  position: absolute;
+  top: 0;
+  left: 25px; /* Centered in the 80px padding area */
+  width: 25px; /* Increased thickness */
+  height: 100%;
+  background-color: #ffffff;
+  opacity: 0.8;
+  z-index: 1;
+}
+
+/* Horizontal Bar */
+.topBar {
+  position: absolute;
+  top: 25px;
+  left: 0;
+  width: 100%;
+  height: 25px; /* Increased thickness */
+  background-color: #ffffff;
+  opacity: 0.8;
+  z-index: 1;
+}
+
+/* Floating ball in top right */
+.topBall {
+  position: absolute;
+  top: 15px;
+  right: 25px;
+  width: 48px;
+  height: 48px;
+  opacity: 0.9;
+  z-index: 2;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 80px;
+  padding-right: 80px;
+}
+
+.title {
+  font-size: 4.5rem;
+  color: var(--text-main);
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding-right: 80px;
+}
+
+.card {
+  background-color: rgba(255, 255, 255, 0.04);
+  padding: 40px 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border-radius: 20px;
+  margin-bottom: 20px;
+}
+
+.card:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.cardMain {
+  display: flex;
+  align-items: center;
+  gap: 50px;
+  flex: 1;
+}
+
+.number {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  color: var(--text-main);
+  min-width: 60px;
+}
+
+.imageBox {
+  width: 180px;
+  height: 180px;
+  flex-shrink: 0;
+}
+
+.imageInner {
+  width: 100%;
+  height: 100%;
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.courtPattern {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.courtPattern::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.textContent {
+  flex: 1;
+}
+
+.featureTitle {
+  font-size: 1.8rem;
+  color: var(--text-main);
+  margin-bottom: 15px;
+  text-transform: uppercase;
+}
+
+.featureDescription {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  max-width: 450px;
+}
+
+.action {
+  margin-left: 30px;
+}
+
+.arrowCircle {
+  width: 60px;
+  height: 60px;
+  background-color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1a1a1a;
+  transition: all 0.3s ease;
+}
+
+/* Match the green arrow from image for the first card */
+.card:first-child .arrowCircle {
+  background-color: var(--primary-color);
+}
+
+.card:hover .arrowCircle {
+  transform: scale(1.1);
+}
+
+@media (max-width: 1200px) {
+  .title {
+    font-size: 3.5rem;
+  }
+  .imageBox {
+    width: 140px;
+    height: 140px;
+  }
+}
+
+@media (max-width: 992px) {
+  .whyChoose {
+    padding-left: 60px;
+    padding-top: 120px;
+  }
+  .leftBar { left: 20px; width: 20px; }
+  .topBar { top: 20px; height: 20px; }
+  .card {
+    padding: 30px;
+  }
+  .cardMain {
+    gap: 30px;
+  }
+  .imageBox {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .whyChoose {
+    padding: 100px 0 60px 40px;
+  }
+  .leftBar { left: 10px; width: 10px; }
+  .topBar { top: 10px; height: 10px; }
+  .title {
+    font-size: 2.5rem;
+  }
+  .header, .list { padding-right: 20px; }
+  .card {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+  .cardMain {
+    flex-direction: column;
+    gap: 15px;
+  }
+  .action {
+    margin-left: 0;
+  }
+}
