@@ -65,10 +65,10 @@ export const Navbar = () => {
 
         <div className="flex flex-1 items-center justify-end gap-[30px]">
           <Link
-            href="#talk"
+            href="/signin"
             className="hidden text-[0.85rem] font-semibold uppercase tracking-[0.05em] text-[#ffffff] underline underline-offset-4 transition-all duration-300 hover:text-primary lg:block"
           >
-            LET&apos;S TALK
+            SIGN IN
           </Link>
 
           {/* Menu Button + Dropdown */}
