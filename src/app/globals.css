@@ -1,103 +1,59 @@
-:root {
-  --primary-color: #d9f170; /* The light lime/yellow color */
-  --primary-hover: #c4dc58;
-  --secondary-color: #ffffff;
-  --secondary-hover: #f0f0f0;
-  --bg-outer: #dcdfd6;
-  --bg-inner: #102b0f; /* Even darker forest green */
-  --text-main: #ffffff;
-  --text-muted: #e0e0e0;
-  --text-color: #1a1a1a;
-  --white: #ffffff;
-  --section-bg-light: #2c452c;
-  --shadow-subtle: 0 4px 6px rgba(0, 0, 0, 0.05);
-  --shadow-medium: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
-  --border-radius: 12px;
-  --border-radius-lg: 32px;
-  --border-radius-pill: 50px;
-  --max-width: 1440px; /* Increased for wider screens */
-  --transition: all 0.3s ease;
-}
+@import "tailwindcss";
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+@theme {
+  --color-primary: #d9f170;
+  --color-primary-hover: #c4dc58;
+  --color-bg-light: #eaf6df;
+  --color-bg-dark: #102b0f;
+  --color-text-main: #ffffff;
+  --color-text-muted: #e0e0e0;
+  --color-text-muted-dark: #5a6b52;
+  --color-text-dark: #1a1a1a;
+  --color-section-dark: #1a3a1a;
 }
 
 html {
   scroll-behavior: smooth;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   max-width: 100vw;
   overflow-x: hidden;
   font-family: var(--font-inter), sans-serif;
-  background-color: var(--bg-inner);
-  color: var(--text-main);
+  background-color: var(--color-bg-light);
+  color: var(--color-text-dark);
   line-height: 1.6;
 }
 
 main {
-  background-color: var(--bg-inner);
+  background-color: var(--color-bg-light);
   min-height: 100vh;
   width: 100%;
   position: relative;
   overflow: hidden;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+  }
 }
 
-button {
-  cursor: pointer;
-  border: none;
-  font-family: inherit;
-}
-
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: var(--font-heading), cursive;
   font-weight: 400;
   line-height: 1.1;
   letter-spacing: 0.02em;
-}
-
-.container {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 0 40px;
-}
-
-.btn {
-  padding: 12px 24px;
-  border-radius: var(--border-radius-pill);
-  font-weight: 600;
-  font-size: 1rem;
-  transition: var(--transition);
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.btn-primary {
-  background-color: var(--primary-color);
-  color: #1a1a1a;
-}
-
-.btn-primary:hover {
-  background-color: var(--primary-hover);
-  transform: translateY(-2px);
-}
-
-.btn-secondary {
-  background-color: var(--secondary-color);
-  color: #1a1a1a;
-}
-
-.btn-secondary:hover {
-  background-color: var(--secondary-hover);
-  transform: translateY(-2px);
 }
