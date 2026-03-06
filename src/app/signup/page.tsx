@@ -96,7 +96,7 @@ export default function SignUpPage() {
       </div>
 
       {/* Right — Sign-up form */}
-      <div className="flex flex-1 items-center justify-center p-6 lg:p-12 bg-bg-dark relative overflow-y-auto">
+      <div className="flex flex-1 items-center justify-center p-4 sm:p-6 lg:p-12 bg-bg-dark relative overflow-y-auto">
         {/* Subtle background glow */}
         <div className="absolute top-1/4 -right-20 w-80 h-80 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute bottom-1/4 -left-20 w-80 h-80 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
@@ -125,7 +125,7 @@ export default function SignUpPage() {
 
           <div className="mb-8">
             <h2
-              className="mb-3 text-[2.5rem] font-bold text-[#ffffff] tracking-tight"
+              className="mb-3 text-[1.8rem] font-bold text-[#ffffff] tracking-tight sm:text-[2.5rem]"
               style={{ fontFamily: "var(--font-heading), sans-serif" }}
             >
               Create account

@@ -57,7 +57,7 @@ export const Footer = () => {
 
       {/* Main footer content */}
       <div className="mx-auto max-w-[1440px] px-5 pt-12 pb-8 md:px-10 lg:pt-16">
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.2fr_0.8fr_1fr]">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-[1.2fr_0.8fr_1fr]">
           {/* Left column — Brand + Email + Socials */}
           <div>
             {/* Brand */}

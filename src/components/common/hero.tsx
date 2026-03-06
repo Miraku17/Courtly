@@ -6,9 +6,9 @@ export const Hero = () => {
     <section className="relative z-[1] flex min-h-[calc(100vh-120px)] items-center bg-bg-dark p-5 sm:p-10">
       {/* Background Court Lines */}
       <div className="pointer-events-none absolute inset-0 z-[-1] overflow-hidden">
-        <div className="absolute left-[55%] top-[-20%] h-[150%] w-[15px] rotate-[35deg] bg-white" />
-        <div className="absolute bottom-[-20%] left-[35%] h-[80%] w-[15px] -rotate-[55deg] bg-white" />
-        <div className="absolute right-[25%] top-0 h-[40%] w-[15px] rotate-[35deg] bg-white" />
+        <div className="absolute left-[55%] top-[-20%] h-[150%] w-[15px] rotate-[35deg] bg-primary/15" />
+        <div className="absolute bottom-[-20%] left-[35%] h-[80%] w-[15px] -rotate-[55deg] bg-primary/15" />
+        <div className="absolute right-[25%] top-0 h-[40%] w-[15px] rotate-[35deg] bg-primary/10" />
       </div>
 
       {/* Floating Tennis Ball */}
@@ -29,7 +29,7 @@ export const Hero = () => {
           </FadeIn>
 
           <FadeIn delay={0.2}>
-            <h1 className="mb-6 text-[3rem] text-text-main sm:text-[4rem] lg:text-[5.5rem]">
+            <h1 className="mb-6 text-[2.2rem] text-text-main sm:text-[3rem] md:text-[4rem] lg:text-[5.5rem]">
               MORE THAN A <span className="text-primary">COURT</span>
               <br />
               <span className="mr-2.5 mb-[15px] hidden h-2.5 w-[60px] bg-text-main align-middle lg:inline-block" />
@@ -77,6 +77,10 @@ export const Hero = () => {
               className="rounded-[32px] object-cover"
               priority
             />
+
+            {/* Dark green overlay to match site theme */}
+            <div className="pointer-events-none absolute inset-0 rounded-[32px] bg-gradient-to-t from-bg-dark/80 via-bg-dark/30 to-bg-dark/10" />
+            <div className="pointer-events-none absolute inset-0 rounded-[32px] bg-section-dark/25 mix-blend-multiply" />
 
             <div className="absolute left-2.5 top-5 z-10 flex items-center gap-3 rounded-[20px] bg-[#f8f9fa] px-3 py-2 shadow-[0_10px_20px_rgba(0,0,0,0.15)] sm:left-5 sm:px-5 sm:py-3 lg:left-[-40px] lg:top-10">
               <div className="flex items-center">
