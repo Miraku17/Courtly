@@ -53,14 +53,14 @@ export const VenuePromo = () => {
             {/* Highlight stats row */}
             <div className="mb-8 flex items-center gap-8">
               <div>
-                <p className="text-[2rem] font-bold text-text-dark" style={{ fontFamily: "var(--font-heading), cursive" }}>
+                <p className="text-[2rem] font-bold text-text-dark">
                   100%
                 </p>
                 <p className="text-[0.85rem] text-text-muted-dark">Free for Owners</p>
               </div>
               <div className="h-10 w-px bg-text-dark/15" />
               <div>
-                <p className="text-[2rem] font-bold text-text-dark" style={{ fontFamily: "var(--font-heading), cursive" }}>
+                <p className="text-[2rem] font-bold text-text-dark">
                   5 Min
                 </p>
                 <p className="text-[0.85rem] text-text-muted-dark">Setup Time</p>
@@ -96,7 +96,7 @@ export const VenuePromo = () => {
                   </svg>
                 </div>
               </div>
-              <p className="text-[2rem] font-bold leading-none text-primary md:text-[2.4rem]" style={{ fontFamily: "var(--font-heading), cursive" }}>
+              <p className="text-[2rem] font-bold leading-none text-primary md:text-[2.4rem]">
                 {s.value}
                 <span className="text-[1.2rem]">{s.suffix}</span>
               </p>

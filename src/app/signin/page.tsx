@@ -39,7 +39,7 @@ export default function SignInPage() {
           <Link
             href="/"
             className="flex items-center gap-3 text-[1.8rem] uppercase text-[#ffffff] font-bold tracking-tighter"
-            style={{ fontFamily: "var(--font-heading), sans-serif" }}
+
           >
             <div className="bg-primary p-1.5 rounded-lg">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" width="24" height="24" className="text-bg-dark">
@@ -59,7 +59,7 @@ export default function SignInPage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="mb-6 text-[4.5rem] leading-[1] font-bold text-[#ffffff]"
-            style={{ fontFamily: "var(--font-heading), sans-serif" }}
+
           >
             PLAY
             <br />
@@ -109,7 +109,7 @@ export default function SignInPage() {
           <Link
             href="/"
             className="mb-12 flex items-center gap-3 text-[1.6rem] uppercase text-[#ffffff] font-bold tracking-tighter lg:hidden"
-            style={{ fontFamily: "var(--font-heading), sans-serif" }}
+
           >
             <div className="bg-primary p-1 rounded-md">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" width="20" height="20" className="text-bg-dark">
@@ -124,7 +124,7 @@ export default function SignInPage() {
           <div className="mb-10">
             <h2
               className="mb-3 text-[1.8rem] font-bold text-[#ffffff] tracking-tight sm:text-[2.5rem]"
-              style={{ fontFamily: "var(--font-heading), sans-serif" }}
+  
             >
               Welcome back
             </h2>

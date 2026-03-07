@@ -1,15 +1,11 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Outfit } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const plusJakarta = Plus_Jakarta_Sans({
-  variable: "--font-body",
-  subsets: ["latin"],
-});
-
-const outfit = Outfit({
-  variable: "--font-heading",
-  subsets: ["latin"],
+const monaSans = localFont({
+  src: "./fonts/MonaSans.woff2",
+  variable: "--font-mona",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -24,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${plusJakarta.variable} ${outfit.variable}`}>
+      <body className={monaSans.variable}>
         {children}
       </body>
     </html>

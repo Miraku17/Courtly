@@ -68,7 +68,7 @@ export const BookingExperiences = () => {
                   <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-section-dark text-primary">
                     {exp.icon}
                   </div>
-                  <h3 className="text-[1.1rem] font-semibold text-text-dark" style={{ fontFamily: "var(--font-heading), cursive" }}>
+                  <h3 className="text-[1.1rem] font-semibold text-text-dark">
                     {exp.title}
                   </h3>
                 </div>

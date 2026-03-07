@@ -30,10 +30,10 @@ export const Hero = () => {
 
           <FadeIn delay={0.2}>
             <h1 className="mb-6 text-[2.2rem] text-text-main sm:text-[3rem] md:text-[4rem] lg:text-[5.5rem]">
-              MORE THAN A <span className="text-primary">COURT</span>
+              PADEL YOUR <span className="text-primary">WAY</span>
               <br />
               <span className="mr-2.5 mb-[15px] hidden h-2.5 w-[60px] bg-text-main align-middle lg:inline-block" />
-              IT&apos;S A LIFESTYLE
+              PLAY WITHOUT LIMITS
             </h1>
           </FadeIn>
 

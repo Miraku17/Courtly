@@ -66,7 +66,7 @@ export const Navbar = () => {
         <Link
           href="/"
           className="flex items-center gap-2 text-[1.4rem] uppercase text-[#ffffff] sm:gap-3 sm:text-[1.8rem] lg:flex-1 lg:justify-center"
-          style={{ fontFamily: "var(--font-heading), sans-serif" }}
+
         >
           <span className="flex items-center">
             <svg
@@ -91,8 +91,8 @@ export const Navbar = () => {
             SIGN IN
           </Link>
 
-          {/* Menu Button + Dropdown/Mobile Menu */}
-          <div ref={dropdownRef} className="relative">
+          {/* Menu Button — mobile only */}
+          <div ref={dropdownRef} className="relative lg:hidden">
             <button
               onClick={() => setOpen(!open)}
               className="flex size-11 items-center justify-center rounded-full bg-primary transition-all duration-300 hover:scale-105 hover:bg-primary-hover sm:size-12"
@@ -123,21 +123,6 @@ export const Navbar = () => {
               </svg>
             </button>
 
-            {/* Desktop dropdown */}
-            {open && (
-              <div className="absolute right-0 top-full mt-3 hidden min-w-[200px] overflow-hidden rounded-xl border border-white/10 bg-bg-dark shadow-[0_16px_40px_rgba(0,0,0,0.4)] lg:block">
-                {dashboardLinks.map((link) => (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    onClick={() => setOpen(false)}
-                    className="flex items-center px-5 py-3 text-[0.9rem] text-[#ffffff] transition-all duration-200 hover:bg-white/[0.08] hover:text-primary"
-                  >
-                    {link.name}
-                  </Link>
-                ))}
-              </div>
-            )}
           </div>
         </div>
       </div>

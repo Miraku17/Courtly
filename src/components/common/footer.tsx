@@ -64,7 +64,7 @@ export const Footer = () => {
             <Link
               href="/"
               className="mb-5 flex items-center gap-3 text-[1.6rem] text-[#ffffff]"
-              style={{ fontFamily: "var(--font-heading), cursive" }}
+
             >
               <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28" className="text-primary">
                 <path d="M12 2C9.5 2 8 4 8 6.5C8 9 10.5 11 12 11C13.5 11 16 9 16 6.5C16 4 14.5 2 12 2ZM12 22C14.5 22 16 20 16 17.5C16 15 13.5 13 12 13C10.5 13 8 15 8 17.5C8 20 9.5 22 12 22ZM2 12C2 14.5 4 16 6.5 16C9 16 11 13.5 11 12C11 10.5 9 8 6.5 8C4 8 2 9.5 2 12ZM22 12C22 9.5 20 8 17.5 8C15 8 13 10.5 13 12C13 13.5 15 16 17.5 16C20 16 22 14.5 22 12Z" />
@@ -158,7 +158,7 @@ export const Footer = () => {
               <div className="pointer-events-none absolute inset-x-0 bottom-4 z-10 text-center">
                 <p
                   className="text-[1.4rem] italic text-[#ffffff] opacity-90"
-                  style={{ fontFamily: "var(--font-heading), sans-serif" }}
+
                 >
                   Serving <span className="text-primary">You</span> Always
                 </p>

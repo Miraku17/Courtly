@@ -147,7 +147,7 @@ export const WhyChoose = () => {
               className="group mb-5 flex cursor-pointer flex-col items-center gap-5 rounded-[20px] bg-bg-dark/[0.06] p-[30px] text-center transition-all duration-300 hover:bg-bg-dark/[0.1] md:flex-row md:justify-between md:gap-[50px] md:p-10 md:px-[50px] md:text-left"
             >
               <div className="flex flex-1 flex-col items-center gap-4 md:flex-row md:gap-[50px]">
-                <div className="min-w-[60px] text-[2.5rem] text-text-dark" style={{ fontFamily: "var(--font-heading), sans-serif" }}>
+                <div className="min-w-[60px] text-[2.5rem] text-text-dark">
                   {feature.id}
                 </div>
 
