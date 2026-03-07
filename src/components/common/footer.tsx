@@ -2,12 +2,7 @@ import Link from "next/link";
 import { TennisBallScene } from "@/components/three/tennis-ball-scene";
 
 const socials = [
-  { name: "Instagram", href: "#" },
-  { name: "Twitter", href: "#" },
-  { name: "Tiktok", href: "#" },
   { name: "Facebook", href: "#" },
-  { name: "Linkedin", href: "#" },
-  { name: "Youtube", href: "#" },
 ];
 
 const quickLinks = [
