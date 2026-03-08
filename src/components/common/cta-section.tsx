@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { FadeIn } from "@/components/common/fade-in";
 
 export const CTASection = () => {
@@ -18,9 +19,9 @@ export const CTASection = () => {
           <button className="inline-flex items-center gap-2.5 rounded-full bg-primary px-6 py-3 font-semibold text-text-dark transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-hover">
             Book Your First Court
           </button>
-          <button className="inline-flex items-center gap-2.5 rounded-full bg-white px-6 py-3 font-semibold text-text-dark transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#f0f0f0]">
+          <Link href="/list-venue" className="inline-flex items-center gap-2.5 rounded-full bg-white px-6 py-3 font-semibold text-text-dark transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#f0f0f0]">
             List Your Venue
-          </button>
+          </Link>
         </div>
         </FadeIn>
       </div>

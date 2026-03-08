@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Image from "next/image";
 import { FadeIn } from "@/components/common/fade-in";
 
@@ -20,7 +21,7 @@ export const VenuePromo = () => {
           <FadeIn direction="left">
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl lg:aspect-auto lg:h-[520px]">
             <Image
-              src="/why_join_us.png"
+              src="/pickle.png"
               alt="Sports venue with courts"
               fill
               className="object-cover"
@@ -68,7 +69,7 @@ export const VenuePromo = () => {
             </div>
 
             {/* CTA */}
-            <button className="inline-flex items-center gap-3 rounded-full border-2 border-text-dark bg-transparent px-6 py-3 font-semibold text-text-dark transition-all duration-300 hover:bg-text-dark hover:text-[#ffffff]">
+            <Link href="/list-venue" className="inline-flex items-center gap-3 rounded-full border-2 border-text-dark bg-transparent px-6 py-3 font-semibold text-text-dark transition-all duration-300 hover:bg-text-dark hover:text-[#ffffff]">
               List Your Venue
               <span className="flex size-8 items-center justify-center rounded-full bg-text-dark text-[#ffffff] transition-all duration-300 group-hover:bg-[#ffffff] group-hover:text-text-dark">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -76,7 +77,7 @@ export const VenuePromo = () => {
                   <polyline points="12 5 19 12 12 19" />
                 </svg>
               </span>
-            </button>
+            </Link>
           </FadeIn>
         </div>
 
