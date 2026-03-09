@@ -4,18 +4,59 @@ import Link from "next/link";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, User, ArrowRight, ChevronRight } from "lucide-react";
+import api from "@/lib/api";
+import { useAuthStore } from "@/store/auth-store";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function SignUpPage() {
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<"player" | "owner">("player");
 
+
+  const { setUser } = useAuthStore();
+  const router = useRouter();
+
+  const mutation = useMutation({
+    mutationFn: (data: {
+      email: string;
+      password: string;
+      firstName: string;
+      lastName: string;
+      role: "PLAYER" | "VENUE_OWNER";
+    }) => api.post("/auth/signup", data).then((res) => res.data),
+    onSuccess: (data) => {
+      setUser(data);
+      toast.success("Account created!");
+      router.push("/dashboard");
+    },
+    onError: (error) => {
+      toast.error("Something went wrong. Please try again.");
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement sign-up logic
+    if (!firstName || !lastName || !email || !password ||
+      !confirmPassword) {
+      toast.error("All fields are required");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    mutation.mutate({
+      email, password, firstName, lastName, role: role === "player" ? "PLAYER" : "VENUE_OWNER",
+    });
   };
 
   return (
@@ -23,9 +64,9 @@ export default function SignUpPage() {
       {/* Left — Branding panel */}
       <div className="relative hidden flex-1 flex-col justify-between p-12 lg:flex">
         {/* Background Image/Overlay */}
-        <div 
+        <div
           className="absolute inset-0 z-0 opacity-40 grayscale contrast-125"
-          style={{ 
+          style={{
             backgroundImage: "url('/hero_1.webp')",
             backgroundSize: "cover",
             backgroundPosition: "center"
@@ -33,7 +74,7 @@ export default function SignUpPage() {
         />
         <div className="absolute inset-0 z-10 bg-gradient-to-br from-bg-dark/95 via-bg-dark/80 to-transparent" />
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -69,7 +110,7 @@ export default function SignUpPage() {
             <br />
             <span className="text-primary">ELITE</span>
           </motion.h1>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -79,7 +120,7 @@ export default function SignUpPage() {
           </motion.p>
         </div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.6 }}
@@ -96,25 +137,25 @@ export default function SignUpPage() {
       </div>
 
       {/* Right — Sign-up form */}
-      <div className="flex flex-1 items-center justify-center p-4 sm:p-6 lg:p-12 bg-bg-dark relative overflow-y-auto">
+      <div className="flex flex-1 items-center justify-center p-4 sm:p-6 lg:p-12 bg-bg-dark relative overflow-y-auto overflow-x-hidden">
         {/* Subtle background glow */}
         <div className="absolute top-1/4 -right-20 w-80 h-80 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute bottom-1/4 -left-20 w-80 h-80 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="w-full max-w-[440px] z-10 py-8"
+          className="w-full max-w-[420px] z-10 py-6"
         >
           {/* Mobile logo */}
           <Link
             href="/"
-            className="mb-12 flex items-center gap-3 text-[1.6rem] uppercase text-[#ffffff] font-bold tracking-tighter lg:hidden"
+            className="mb-8 flex items-center gap-2 text-[1.4rem] uppercase text-[#ffffff] font-bold tracking-tighter lg:hidden"
 
           >
             <div className="bg-primary p-1 rounded-md">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" width="20" height="20" className="text-bg-dark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" width="18" height="18" className="text-bg-dark">
                 <circle cx="12" cy="12" r="10" />
                 <path d="M12 2v20" />
                 <path d="M2 12h20" />
@@ -123,81 +164,100 @@ export default function SignUpPage() {
             COURTLY
           </Link>
 
-          <div className="mb-8">
+          <div className="mb-6">
             <h2
-              className="mb-3 text-[1.8rem] font-bold text-[#ffffff] tracking-tight sm:text-[2.5rem]"
-  
+              className="mb-2 text-[1.6rem] font-bold text-[#ffffff] tracking-tight sm:text-[2.2rem]"
+
             >
               Create account
             </h2>
-            <p className="text-[1.05rem] text-text-muted/70">
+            <p className="text-[0.95rem] text-text-muted/70">
               Join Courtly and start booking courts today
             </p>
           </div>
 
           {/* Role selection toggle */}
-          <div className="mb-8 flex p-1.5 bg-white/[0.03] rounded-2xl border border-white/5 relative">
-            <motion.div 
-              className="absolute bg-primary rounded-xl"
+          <div className="mb-6 flex p-1 bg-white/[0.03] rounded-xl border border-white/5 relative">
+            <motion.div
+              className="absolute bg-primary rounded-lg"
               initial={false}
-              animate={{ 
+              animate={{
                 x: role === "player" ? "0%" : "100%",
                 width: "50%",
-                height: "calc(100% - 12px)",
-                top: "6px"
+                height: "calc(100% - 8px)",
+                top: "4px"
               }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             />
             <button
               type="button"
               onClick={() => setRole("player")}
-              className={`relative z-10 flex-1 py-3 text-[0.9rem] font-bold transition-colors duration-300 ${
-                role === "player" ? "text-bg-dark" : "text-text-muted/60 hover:text-white"
-              }`}
+              className={`relative z-10 flex-1 py-2 text-[0.8rem] font-bold transition-colors duration-300 ${role === "player" ? "text-bg-dark" : "text-text-muted/60 hover:text-white"
+                }`}
             >
               Player
             </button>
             <button
               type="button"
               onClick={() => setRole("owner")}
-              className={`relative z-10 flex-1 py-3 text-[0.9rem] font-bold transition-colors duration-300 ${
-                role === "owner" ? "text-bg-dark" : "text-text-muted/60 hover:text-white"
-              }`}
+              className={`relative z-10 flex-1 py-2 text-[0.8rem] font-bold transition-colors duration-300 ${role === "owner" ? "text-bg-dark" : "text-text-muted/60 hover:text-white"
+                }`}
             >
               Venue Owner
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            {/* Full Name */}
-            <div className="space-y-2">
-              <label htmlFor="name" className="text-[0.85rem] font-bold uppercase tracking-[0.1em] text-text-muted/50 ml-1">
-                Full Name
-              </label>
-              <div className="relative group">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted/40 group-focus-within:text-primary transition-colors">
-                  <User size={20} />
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {/* First Name / Last Name */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label htmlFor="firstName" className="text-[0.75rem] font-bold uppercase tracking-[0.1em] text-text-muted/50 ml-1">
+                  First Name
+                </label>
+                <div className="relative group">
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted/40 group-focus-within:text-primary transition-colors">
+                    <User size={16} />
+                  </div>
+                  <input
+                    id="firstName"
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="John"
+                    required
+                    className="w-full rounded-xl border border-white/5 bg-white/[0.03] px-9 py-2.5 text-[0.85rem] text-[#ffffff] placeholder-white/20 outline-none transition-all duration-300 focus:border-primary/40 focus:bg-white/[0.05] focus:ring-2 focus:ring-primary/10"
+                  />
                 </div>
-                <input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="John Doe"
-                  required
-                  className="w-full rounded-2xl border border-white/5 bg-white/[0.03] px-12 py-4 text-[1rem] text-[#ffffff] placeholder-white/20 outline-none transition-all duration-300 focus:border-primary/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-primary/5"
-                />
+              </div>
+              <div className="space-y-1.5">
+                <label htmlFor="lastName" className="text-[0.75rem] font-bold uppercase tracking-[0.1em] text-text-muted/50 ml-1">
+                  Last Name
+                </label>
+                <div className="relative group">
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted/40 group-focus-within:text-primary transition-colors">
+                    <User size={16} />
+                  </div>
+                  <input
+                    id="lastName"
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Doe"
+                    required
+                    className="w-full rounded-xl border border-white/5 bg-white/[0.03] px-9 py-2.5 text-[0.85rem] text-[#ffffff] placeholder-white/20 outline-none transition-all duration-300 focus:border-primary/40 focus:bg-white/[0.05] focus:ring-2 focus:ring-primary/10"
+                  />
+                </div>
               </div>
             </div>
 
             {/* Email */}
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-[0.85rem] font-bold uppercase tracking-[0.1em] text-text-muted/50 ml-1">
+            <div className="space-y-1.5">
+              <label htmlFor="email" className="text-[0.75rem] font-bold uppercase tracking-[0.1em] text-text-muted/50 ml-1">
                 Email Address
               </label>
               <div className="relative group">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted/40 group-focus-within:text-primary transition-colors">
-                  <Mail size={20} />
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted/40 group-focus-within:text-primary transition-colors">
+                  <Mail size={18} />
                 </div>
                 <input
                   id="email"
@@ -206,20 +266,20 @@ export default function SignUpPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
                   required
-                  className="w-full rounded-2xl border border-white/5 bg-white/[0.03] px-12 py-4 text-[1rem] text-[#ffffff] placeholder-white/20 outline-none transition-all duration-300 focus:border-primary/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-primary/5"
+                  className="w-full rounded-xl border border-white/5 bg-white/[0.03] px-10 py-2.5 text-[0.85rem] text-[#ffffff] placeholder-white/20 outline-none transition-all duration-300 focus:border-primary/40 focus:bg-white/[0.05] focus:ring-2 focus:ring-primary/10"
                 />
               </div>
             </div>
 
             {/* Password */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label htmlFor="password" className="text-[0.85rem] font-bold uppercase tracking-[0.1em] text-text-muted/50 ml-1">
+              <div className="space-y-1.5">
+                <label htmlFor="password" className="text-[0.75rem] font-bold uppercase tracking-[0.1em] text-text-muted/50 ml-1">
                   Password
                 </label>
                 <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted/40 group-focus-within:text-primary transition-colors">
-                    <Lock size={18} />
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted/40 group-focus-within:text-primary transition-colors">
+                    <Lock size={16} />
                   </div>
                   <input
                     id="password"
@@ -228,17 +288,17 @@ export default function SignUpPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     required
-                    className="w-full rounded-2xl border border-white/5 bg-white/[0.03] px-11 py-3.5 text-[0.95rem] text-[#ffffff] placeholder-white/20 outline-none transition-all duration-300 focus:border-primary/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-primary/5"
+                    className="w-full rounded-xl border border-white/5 bg-white/[0.03] px-9 py-2.5 text-[0.85rem] text-[#ffffff] placeholder-white/20 outline-none transition-all duration-300 focus:border-primary/40 focus:bg-white/[0.05] focus:ring-2 focus:ring-primary/10"
                   />
                 </div>
               </div>
-              <div className="space-y-2">
-                <label htmlFor="confirm-password" className="text-[0.85rem] font-bold uppercase tracking-[0.1em] text-text-muted/50 ml-1">
+              <div className="space-y-1.5">
+                <label htmlFor="confirm-password" className="text-[0.75rem] font-bold uppercase tracking-[0.1em] text-text-muted/50 ml-1">
                   Confirm
                 </label>
                 <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted/40 group-focus-within:text-primary transition-colors">
-                    <Lock size={18} />
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted/40 group-focus-within:text-primary transition-colors">
+                    <Lock size={16} />
                   </div>
                   <input
                     id="confirm-password"
@@ -247,23 +307,23 @@ export default function SignUpPage() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
                     required
-                    className="w-full rounded-2xl border border-white/5 bg-white/[0.03] px-11 py-3.5 text-[0.95rem] text-[#ffffff] placeholder-white/20 outline-none transition-all duration-300 focus:border-primary/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-primary/5"
+                    className="w-full rounded-xl border border-white/5 bg-white/[0.03] px-9 py-2.5 text-[0.85rem] text-[#ffffff] placeholder-white/20 outline-none transition-all duration-300 focus:border-primary/40 focus:bg-white/[0.05] focus:ring-2 focus:ring-primary/10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted/40 transition-colors hover:text-[#ffffff]"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-muted/40 transition-colors hover:text-[#ffffff]"
                   >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
             </div>
 
             {/* Terms check */}
-            <p className="text-[0.85rem] text-text-muted/50 leading-relaxed px-1">
+            <p className="text-[0.75rem] text-text-muted/50 leading-relaxed px-1">
               By creating an account, you agree to our{" "}
-              <Link href="#" className="text-primary/70 hover:text-primary transition-colors underline underline-offset-4">Terms of Service</Link> and{" "}
+              <Link href="#" className="text-primary/70 hover:text-primary transition-colors underline underline-offset-4">Terms</Link> and{" "}
               <Link href="#" className="text-primary/70 hover:text-primary transition-colors underline underline-offset-4">Privacy Policy</Link>.
             </p>
 
@@ -272,23 +332,25 @@ export default function SignUpPage() {
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
               type="submit"
-              className="flex w-full items-center justify-center gap-3 rounded-2xl bg-primary py-4 text-[1.05rem] font-bold text-bg-dark shadow-lg shadow-primary/10 transition-all duration-300 hover:bg-primary-hover hover:shadow-primary/20 mt-2"
+              disabled={mutation.isPending}
+
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-[0.95rem] font-bold text-bg-dark shadow-lg shadow-primary/10 transition-all duration-300 hover:bg-primary-hover hover:shadow-primary/20 mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Account
-              <ArrowRight size={20} />
+              {mutation.isPending ? "Creating..." : "Create Account"}
+              <ArrowRight size={18} />
             </motion.button>
           </form>
 
           {/* Divider */}
-          <div className="my-8 flex items-center gap-4">
+          <div className="my-6 flex items-center gap-4">
             <div className="h-px flex-1 bg-white/5" />
-            <span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-text-muted/30">OR SIGN UP WITH</span>
+            <span className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-text-muted/30">OR SIGN UP WITH</span>
             <div className="h-px flex-1 bg-white/5" />
           </div>
 
           {/* Social sign-up */}
-          <button className="flex w-full items-center justify-center gap-3 rounded-2xl border border-white/5 bg-white/[0.02] py-3.5 text-[0.95rem] font-bold text-[#ffffff] transition-all duration-300 hover:border-white/10 hover:bg-white/[0.05] group">
-            <svg width="20" height="20" viewBox="0 0 24 24" className="group-hover:scale-110 transition-transform">
+          <button className="flex w-full items-center justify-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] py-2.5 text-[0.85rem] font-bold text-[#ffffff] transition-all duration-300 hover:border-white/10 hover:bg-white/[0.05] group">
+            <svg width="18" height="18" viewBox="0 0 24 24" className="group-hover:scale-110 transition-transform">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
@@ -298,7 +360,7 @@ export default function SignUpPage() {
           </button>
 
           {/* Sign in link */}
-          <p className="mt-10 text-center text-[1rem] text-text-muted/60">
+          <p className="mt-8 text-center text-[0.9rem] text-text-muted/60">
             Already have an account?{" "}
             <Link href="/signin" className="font-bold text-primary transition-all hover:text-primary-hover border-b border-primary/20 hover:border-primary pb-0.5 inline-flex items-center gap-1 group">
               Sign in
