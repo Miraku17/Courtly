@@ -374,13 +374,6 @@ export default function VenueOwnerOnboarding() {
         </svg>
       </div>
 
-      {/* Scattered dot accents */}
-      <div className="fixed top-[18%] left-[8%] w-2 h-2 rounded-full bg-primary/20 pointer-events-none z-[-1]" />
-      <div className="fixed top-[34%] left-[14%] w-1.5 h-1.5 rounded-full bg-primary/15 pointer-events-none z-[-1]" />
-      <div className="fixed top-[60%] left-[6%] w-1 h-1 rounded-full bg-primary/20 pointer-events-none z-[-1]" />
-      <div className="fixed top-[12%] right-[18%] w-1.5 h-1.5 rounded-full bg-primary/15 pointer-events-none z-[-1]" />
-      <div className="fixed top-[72%] right-[10%] w-2 h-2 rounded-full bg-primary/10 pointer-events-none z-[-1]" />
-      <div className="fixed top-[45%] right-[6%] w-1 h-1 rounded-full bg-primary/20 pointer-events-none z-[-1]" />
 
       {/* Diamond accent */}
       <div className="fixed bottom-[28%] left-[10%] w-10 h-10 border border-primary/10 rotate-45 pointer-events-none z-[-1]" />
