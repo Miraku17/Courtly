@@ -16,6 +16,11 @@ html {
   scroll-behavior: smooth;
 }
 
+.bg-dot-grid {
+  background-image: radial-gradient(circle, rgba(217, 241, 112, 0.12) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
 html,
 body {
   width: 100%;
@@ -28,7 +33,6 @@ body {
 }
 
 main {
-  background-color: var(--color-bg-light);
   min-height: 100vh;
   width: 100%;
   position: relative;
