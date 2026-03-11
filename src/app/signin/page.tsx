@@ -4,15 +4,42 @@ import Link from "next/link";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import api from "@/lib/api";
+import { useAuthStore } from "@/store/auth-store";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  const { setUser } = useAuthStore();
+  const router = useRouter();
+
+  const mutation = useMutation({
+    mutationFn: (data: { email: string; password: string }) =>
+      api.post("/auth/signin", data).then((res) => res.data),
+    onSuccess: (data) => {
+      setUser({ userId: data.user.id, email: data.user.email, role: data.user.role });
+      toast.success("Welcome back!");
+      setTimeout(() => router.push("/dashboard"), 1000);
+    },
+    onError: (error: any) => {
+      const message =
+        error?.response?.data?.message || "Something went wrong. Please try again.";
+      toast.error(message);
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement sign-in logic
+    if (!email || !password) {
+      toast.error("All fields are required");
+      return;
+    }
+    mutation.mutate({ email, password });
   };
 
   return (
@@ -20,9 +47,9 @@ export default function SignInPage() {
       {/* Left — Branding panel */}
       <div className="relative hidden flex-1 flex-col justify-between p-12 lg:flex">
         {/* Background Image/Overlay */}
-        <div 
+        <div
           className="absolute inset-0 z-0 opacity-40 grayscale contrast-125"
-          style={{ 
+          style={{
             backgroundImage: "url('/hero_1.webp')",
             backgroundSize: "cover",
             backgroundPosition: "center"
@@ -30,7 +57,7 @@ export default function SignInPage() {
         />
         <div className="absolute inset-0 z-10 bg-gradient-to-br from-bg-dark/95 via-bg-dark/80 to-transparent" />
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -67,7 +94,7 @@ export default function SignInPage() {
             <br />
             <span className="text-primary">LIMITS</span>
           </motion.h1>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -77,7 +104,7 @@ export default function SignInPage() {
           </motion.p>
         </div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.6 }}
@@ -99,7 +126,7 @@ export default function SignInPage() {
         <div className="absolute top-1/4 -right-20 w-80 h-80 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute bottom-1/4 -left-20 w-80 h-80 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
@@ -124,7 +151,7 @@ export default function SignInPage() {
           <div className="mb-8">
             <h2
               className="mb-2 text-[1.6rem] font-bold text-[#ffffff] tracking-tight sm:text-[2.2rem]"
-  
+
             >
               Welcome back
             </h2>
@@ -193,9 +220,10 @@ export default function SignInPage() {
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
               type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-[0.95rem] font-bold text-bg-dark shadow-lg shadow-primary/10 transition-all duration-300 hover:bg-primary-hover hover:shadow-primary/20 mt-1"
+              disabled={mutation.isPending}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-[0.95rem] font-bold text-bg-dark shadow-lg shadow-primary/10 transition-all duration-300 hover:bg-primary-hover hover:shadow-primary/20 mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign In
+              {mutation.isPending ? "Signing in..." : "Sign In"}
               <ArrowRight size={18} />
             </motion.button>
           </form>
