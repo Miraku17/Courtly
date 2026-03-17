@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   CalendarDays,
   Search,
@@ -13,7 +14,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import api from "@/lib/api";
+import { toast } from "sonner";
 
 const navItems = [
   { name: "My Bookings", label: "Bookings", icon: CalendarDays, href: "/player/bookings" },
@@ -29,7 +32,23 @@ export default function PlayerLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const { user } = useAuthStore();
+  const router = useRouter();
+  const { user, clearUser } = useAuthStore();
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      await api.post("/auth/signout");
+    } catch {
+      // Even if the API call fails, we still clear client-side state
+      // The middleware will redirect on next protected route visit anyway
+    }
+    clearUser();
+    toast.success("Signed out successfully");
+    router.push("/signin");
+  };
 
   return (
     <div className="flex min-h-screen bg-bg-dark text-text-main font-mona">
@@ -87,8 +106,13 @@ export default function PlayerLayout({
         </nav>
 
         <div className="p-3 mt-auto border-t border-white/[0.06]">
-          <button className="flex w-full items-center gap-3 px-4 py-3 rounded-xl text-text-muted/60 hover:bg-red-500/[0.06] hover:text-red-400 transition-all duration-200 text-[0.9rem] font-medium">
-            <LogOut size={18} />
+          <button
+            onClick={() => setShowSignOutConfirm(true)}
+            className="group flex w-full items-center gap-3 px-4 py-3 rounded-xl text-text-muted/60 hover:bg-red-500/[0.08] hover:text-red-400 transition-all duration-200 text-[0.9rem] font-medium"
+          >
+            <div className="flex size-8 items-center justify-center rounded-lg bg-red-500/[0.06] group-hover:bg-red-500/15 transition-colors">
+              <LogOut size={15} className="group-hover:text-red-400 transition-colors" />
+            </div>
             <span>Sign Out</span>
           </button>
         </div>
@@ -129,6 +153,78 @@ export default function PlayerLayout({
           })}
         </div>
       </nav>
+
+      {/* Sign Out Confirmation Modal */}
+      <AnimatePresence>
+        {showSignOutConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-100 flex items-center justify-center bg-black/70 backdrop-blur-md p-4"
+            onClick={() => !isSigningOut && setShowSignOutConfirm(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              className="relative w-full max-w-[360px] overflow-hidden rounded-2xl border border-white/[0.08] bg-bg-dark shadow-2xl shadow-black/40"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Red glow accent */}
+              <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-40 h-40 bg-red-500/10 rounded-full blur-[80px] pointer-events-none" />
+
+              <div className="relative p-6 pt-8 flex flex-col items-center text-center">
+                {/* Icon */}
+                <motion.div
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.1 }}
+                  className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-b from-red-500/20 to-red-500/5 border border-red-500/15 mb-5"
+                >
+                  <LogOut size={22} className="text-red-400" />
+                </motion.div>
+
+                <h3 className="text-[1.1rem] font-bold text-white mb-1.5">
+                  Sign out of Courtly?
+                </h3>
+                <p className="text-[0.85rem] text-text-muted/50 leading-relaxed max-w-[260px]">
+                  You&apos;ll need to sign in again to access your bookings and account.
+                </p>
+              </div>
+
+              <div className="p-4 pt-2 flex gap-3">
+                <button
+                  onClick={() => setShowSignOutConfirm(false)}
+                  disabled={isSigningOut}
+                  className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.04] py-2.5 text-[0.85rem] font-semibold text-white transition-all hover:bg-white/[0.08] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSignOut}
+                  disabled={isSigningOut}
+                  className="flex-1 rounded-xl bg-red-500 py-2.5 text-[0.85rem] font-semibold text-white transition-all hover:bg-red-600 active:scale-[0.98] disabled:opacity-60 disabled:pointer-events-none shadow-lg shadow-red-500/20"
+                >
+                  {isSigningOut ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="size-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Signing out
+                    </span>
+                  ) : (
+                    "Sign Out"
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
