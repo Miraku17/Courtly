@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
-import api from "@/lib/api";
+import { signIn } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/auth-store";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -19,8 +19,7 @@ export default function SignInPage() {
   const router = useRouter();
 
   const mutation = useMutation({
-    mutationFn: (data: { email: string; password: string }) =>
-      api.post("/auth/signin", data).then((res) => res.data),
+    mutationFn: (data: { email: string; password: string }) => signIn(data),
     onSuccess: (data) => {
       setUser({ userId: data.user.id, email: data.user.email, role: data.user.role });
       toast.success("Welcome back!");

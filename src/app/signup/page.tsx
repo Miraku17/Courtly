@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, User, ArrowRight, ChevronRight } from "lucide-react";
-import api from "@/lib/api";
+import { signUp } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/auth-store";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -30,7 +30,7 @@ export default function SignUpPage() {
       firstName: string;
       lastName: string;
       role: "PLAYER" | "VENUE_OWNER";
-    }) => api.post("/auth/signup", data).then((res) => res.data),
+    }) => signUp(data),
     onSuccess: (data) => {
       setUser(data);
       toast.success("Account created!");
