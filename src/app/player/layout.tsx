@@ -15,8 +15,10 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
 import { motion, AnimatePresence } from "framer-motion";
-import api from "@/lib/api";
+import { signOut } from "@/lib/api/auth";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { getProfile } from "@/lib/api/profiles";
 
 const navItems = [
   { name: "My Bookings", label: "Bookings", icon: CalendarDays, href: "/player/bookings" },
@@ -40,7 +42,7 @@ export default function PlayerLayout({
   const handleSignOut = async () => {
     setIsSigningOut(true);
     try {
-      await api.post("/auth/signout");
+      await signOut();
     } catch {
       // Even if the API call fails, we still clear client-side state
       // The middleware will redirect on next protected route visit anyway
@@ -49,6 +51,12 @@ export default function PlayerLayout({
     toast.success("Signed out successfully");
     router.push("/signin");
   };
+
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["profile"],
+    queryFn: getProfile,
+  });
 
   return (
     <div className="flex min-h-screen bg-bg-dark text-text-main font-mona">
@@ -77,7 +85,7 @@ export default function PlayerLayout({
             </div>
             <div className="min-w-0">
               <div className="text-sm font-bold text-white truncate">
-                {user?.email?.split("@")[0] || "Player"}
+                {data?.profile?.first_name}
               </div>
               <div className="text-[11px] text-text-muted/50 font-medium">Player Account</div>
             </div>

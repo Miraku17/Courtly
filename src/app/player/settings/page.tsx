@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User, Bell, Lock, Trash2, Camera, Mail, Phone, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { getProfile, updateProfile } from "@/lib/api/profiles";
+import { toast } from "sonner";
 
 const settingsNav = [
   { key: "profile" as const, icon: User, label: "Profile" },
@@ -13,7 +16,6 @@ const settingsNav = [
 
 export default function SettingsPage() {
   const [activeSection, setActiveSection] = useState<"profile" | "notifications" | "security">("profile");
-
   return (
     <div className="space-y-8">
       <motion.div
@@ -79,6 +81,39 @@ export default function SettingsPage() {
 }
 
 function ProfileSection() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["profile"],
+    queryFn: getProfile,
+  });
+
+  useEffect(() => {
+    if (data?.profile) {
+      setFirstName(data.profile.first_name ?? "");
+      setLastName(data.profile.last_name ?? "");
+      setPhone(data.profile.phone ?? "");
+      setEmail(data.profile.email ?? "");
+    }
+  }, [data]);
+
+  const mutation = useMutation({
+    mutationFn: () => updateProfile({ firstName, lastName, phone }),
+    onSuccess: (res) => { toast.success(res.message) },
+    onError: () => { toast.error("Failed to update profile.") },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="size-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -97,15 +132,19 @@ function ProfileSection() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <SettingsInput label="First Name" defaultValue="Zian" />
-        <SettingsInput label="Last Name" defaultValue="Valles" />
-        <SettingsInput label="Email Address" defaultValue="zian@example.com" disabled icon={Mail} />
-        <SettingsInput label="Phone Number" defaultValue="+1 (555) 000-0000" icon={Phone} />
+        <SettingsInput label="First Name" value={firstName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)} />
+        <SettingsInput label="Last Name" value={lastName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)} />
+        <SettingsInput label="Email Address" value={email} disabled icon={Mail} />
+        <SettingsInput label="Phone Number" value={phone} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)} icon={Phone} />
       </div>
 
       <div className="flex justify-end pt-2">
-        <button className="px-8 py-3 rounded-xl bg-primary text-text-dark font-bold text-sm hover:brightness-110 transition-all">
-          Save Changes
+        <button
+          onClick={() => mutation.mutate()}
+          disabled={mutation.isPending}
+          className="px-8 py-3 rounded-xl bg-primary text-text-dark font-bold text-sm hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {mutation.isPending ? "Saving..." : "Save Changes"}
         </button>
       </div>
     </div>
