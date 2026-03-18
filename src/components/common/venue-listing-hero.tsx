@@ -2,8 +2,16 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, CheckCircle } from "lucide-react";
+
+const rotatingTexts = [
+  "Fill your courts.",
+  "Grow your revenue.",
+  "Reach more players.",
+  "Book out every slot.",
+];
 
 const perks = [
   "Free to list — no hidden fees",
@@ -12,6 +20,40 @@ const perks = [
 ];
 
 export const VenueListingHero = () => {
+  const [textIndex, setTextIndex] = useState(0);
+  const [displayText, setDisplayText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const typeSpeed = 55;
+  const deleteSpeed = 25;
+  const pauseDuration = 1500;
+
+  const tick = useCallback(() => {
+    const fullText = rotatingTexts[textIndex];
+
+    if (!isDeleting) {
+      const next = fullText.slice(0, displayText.length + 1);
+      setDisplayText(next);
+      if (next === fullText) {
+        setTimeout(() => setIsDeleting(true), pauseDuration);
+        return;
+      }
+    } else {
+      const next = fullText.slice(0, displayText.length - 1);
+      setDisplayText(next);
+      if (next === "") {
+        setIsDeleting(false);
+        setTextIndex((prev) => (prev + 1) % rotatingTexts.length);
+        return;
+      }
+    }
+  }, [displayText, isDeleting, textIndex]);
+
+  useEffect(() => {
+    const timeout = setTimeout(tick, isDeleting ? deleteSpeed : typeSpeed);
+    return () => clearTimeout(timeout);
+  }, [tick, isDeleting]);
+
   return (
     <section className="relative overflow-hidden bg-bg-dark px-4 pb-20 pt-24 sm:px-6 sm:pb-28 sm:pt-32 md:px-10 md:pb-32 md:pt-40">
       {/* Background — diagonal lines instead of dot grid */}
@@ -57,7 +99,15 @@ export const VenueListingHero = () => {
           >
             List your venue.
             <br />
-            <span className="text-primary">Fill your courts.</span>
+            <span className="text-primary">
+              {displayText}
+              <motion.span
+                animate={{ opacity: [1, 0] }}
+                transition={{ duration: 0.6, repeat: Infinity, repeatType: "reverse" }}
+                className="inline-block w-[3px] translate-y-[2px] bg-primary align-baseline"
+                style={{ height: "0.85em" }}
+              />
+            </span>
           </motion.h1>
 
           <motion.p

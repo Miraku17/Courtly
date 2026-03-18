@@ -1,4 +1,8 @@
+"use client";
+
+import Image from "next/image";
 import { FadeIn } from "@/components/common/fade-in";
+import { motion } from "framer-motion";
 import { ReactNode } from "react";
 
 const InstantBookingIcon = () => (
@@ -124,14 +128,43 @@ export const WhyChoose = () => {
       {/* Horizontal Bar */}
       <div className="absolute top-[10px] left-0 z-[1] h-[10px] w-full bg-bg-dark opacity-80 md:top-5 md:h-5 lg:top-[25px] lg:h-[25px]" />
 
-      {/* Floating ball */}
-      <div className="absolute top-[15px] right-[25px] z-[2] size-12 opacity-90">
-        <svg viewBox="0 0 100 100" fill="currentColor" className="text-primary">
-          <circle cx="50" cy="50" r="50" />
-          <path d="M 20 20 Q 50 50 20 80" stroke="#102b0f" strokeWidth="6" fill="none" />
-          <path d="M 80 20 Q 50 50 80 80" stroke="#102b0f" strokeWidth="6" fill="none" />
-        </svg>
-      </div>
+      {/* Animated Pixel Tennis Ball — top right */}
+      <motion.div
+        className="absolute top-[15px] right-[25px] z-[2]"
+        animate={{ y: [0, -15, 0], rotate: [0, 360] }}
+        transition={{
+          y: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+          rotate: { duration: 8, repeat: Infinity, ease: "linear" },
+        }}
+      >
+        <Image
+          src="/tennis_pixel.png"
+          alt=""
+          width={90}
+          height={90}
+          style={{ imageRendering: "pixelated" }}
+          className="drop-shadow-[0_0_10px_rgba(217,241,112,0.4)]"
+        />
+      </motion.div>
+
+      {/* Animated Pixel Tennis Ball — bottom left */}
+      <motion.div
+        className="absolute bottom-[40px] left-[50px] z-[2] hidden md:block"
+        animate={{ y: [0, -10, 0], rotate: [0, -360] }}
+        transition={{
+          y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+          rotate: { duration: 12, repeat: Infinity, ease: "linear" },
+        }}
+      >
+        <Image
+          src="/tennis_pixel.png"
+          alt=""
+          width={70}
+          height={70}
+          style={{ imageRendering: "pixelated" }}
+          className="opacity-50 drop-shadow-[0_0_8px_rgba(217,241,112,0.3)]"
+        />
+      </motion.div>
 
       <div className="mx-auto max-w-[1440px]">
         <FadeIn className="mb-20 pr-5 text-center md:pr-20">

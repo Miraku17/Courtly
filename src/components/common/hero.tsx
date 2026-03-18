@@ -33,6 +33,8 @@ export const Hero = () => {
         <TennisBallScene />
       </div>
 
+
+
       <div className="relative z-[2] mx-auto grid w-full max-w-[1440px] items-center gap-[40px] text-center lg:grid-cols-[1.2fr_1fr] lg:gap-[80px] lg:text-left">
         <div className="flex flex-col items-center lg:items-start">
           <FadeIn delay={0.1}>
