@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { User, Bell, Lock, Trash2, Camera, Mail, Phone, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { getProfile, updateProfile } from "@/lib/api/profiles";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getProfile, updateProfile, uploadAvatar } from "@/lib/api/profiles";
 import { toast } from "sonner";
+
 
 const settingsNav = [
   { key: "profile" as const, icon: User, label: "Profile" },
@@ -106,6 +107,24 @@ function ProfileSection() {
     onError: () => { toast.error("Failed to update profile.") },
   });
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
+
+  const avatarMutation = useMutation({
+    mutationFn: (file: File) => uploadAvatar(file),
+    onSuccess: () => {
+      toast.success("Avatar uploaded successfully.");
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+    },
+    onError: () => { toast.error("Failed to upload avatar."); },
+  });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) avatarMutation.mutate(file);
+  };
+
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -119,9 +138,18 @@ function ProfileSection() {
       <div className="flex flex-col sm:flex-row items-center gap-6">
         <div className="relative group">
           <div className="size-24 rounded-2xl bg-primary/15 border-2 border-dashed border-primary/30 flex items-center justify-center text-primary overflow-hidden">
-            <User size={48} strokeWidth={1.5} />
+            {data?.profile?.avatar_url ? (
+              <img src={data.profile.avatar_url} alt="Avatar" className="size-full object-cover" />
+            ) : (
+              <User size={48} strokeWidth={1.5} />
+            )}
           </div>
-          <button className="absolute -bottom-1 -right-1 size-8 rounded-lg bg-primary text-text-dark flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
+          <input type="file" ref={fileInputRef} accept="image/jpeg,image/png" hidden onChange={handleFileChange} />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={avatarMutation.isPending}
+            className="absolute -bottom-1 -right-1 size-8 rounded-lg bg-primary text-text-dark flex items-center justify-center shadow-lg hover:scale-110 transition-transform disabled:opacity-50"
+          >
             <Camera size={14} />
           </button>
         </div>

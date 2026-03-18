@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 
 const navLinks = [
-  { name: "Find Courts", href: "#coach" },
+  { name: "Find Courts", href: "/courts" },
   { name: "List Your Venue", href: "/list-venue" },
   { name: "Sign In", href: "/signin" },
 ];
@@ -47,7 +47,7 @@ export const Navbar = () => {
         {/* Desktop nav links */}
         <div className="hidden flex-1 gap-10 lg:flex">
           <Link
-            href="#coach"
+            href="/courts"
             className="flex flex-col text-[0.85rem] font-semibold uppercase leading-[1.3] tracking-[0.05em] text-[#ffffff] transition-all duration-300 hover:text-primary"
           >
             <span>Find</span>

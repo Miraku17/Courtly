@@ -77,20 +77,55 @@ export default function PlayerLayout({
           </Link>
         </div>
 
-        {/* User Profile */}
-        <div className="mx-4 mb-6 p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
-          <div className="flex items-center gap-3">
-            <div className="size-10 rounded-full bg-primary/15 border border-primary/20 flex items-center justify-center">
-              <User size={18} className="text-primary" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-sm font-bold text-white truncate">
-                {data?.profile?.first_name}
+        {/* Player Card */}
+        <Link
+          href="/player/settings"
+          className="mx-3 mb-6 rounded-2xl overflow-hidden group block transition-all duration-300 hover:scale-[1.02]"
+        >
+          <div className="relative bg-gradient-to-br from-primary/20 via-primary/5 to-transparent border border-primary/15 rounded-2xl p-4 hover:border-primary/30 transition-all">
+            {/* Decorative glow */}
+            <div className="absolute top-0 right-0 w-20 h-20 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="relative flex items-center gap-3 mb-3">
+              <div className="relative">
+                <div className="size-12 rounded-xl bg-primary/20 border-2 border-primary/30 flex items-center justify-center overflow-hidden group-hover:border-primary/50 transition-colors shadow-lg shadow-primary/10">
+                  {data?.profile?.avatar_url ? (
+                    <img src={data.profile.avatar_url} alt="Avatar" className="size-full object-cover" />
+                  ) : (
+                    <User size={20} className="text-primary" />
+                  )}
+                </div>
+                <div className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full bg-emerald-500 border-2 border-bg-dark shadow-sm shadow-emerald-500/30" />
               </div>
-              <div className="text-[11px] text-text-muted/50 font-medium">Player Account</div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[0.85rem] font-extrabold text-white truncate group-hover:text-primary transition-colors tracking-tight">
+                  {data?.profile?.first_name && data?.profile?.last_name
+                    ? `${data.profile.first_name} ${data.profile.last_name}`
+                    : user?.email?.split("@")[0] || "Player"}
+                </div>
+                <div className="text-[10px] text-primary/60 font-bold uppercase tracking-widest mt-0.5">Player</div>
+              </div>
+            </div>
+
+            {/* Stats bar */}
+            <div className="flex items-center gap-3 pt-3 border-t border-white/[0.06]">
+              <div className="flex-1 text-center">
+                <div className="text-[0.8rem] font-extrabold text-white">0</div>
+                <div className="text-[9px] text-text-muted/40 font-bold uppercase tracking-wider">Matches</div>
+              </div>
+              <div className="w-px h-6 bg-white/[0.06]" />
+              <div className="flex-1 text-center">
+                <div className="text-[0.8rem] font-extrabold text-white">0</div>
+                <div className="text-[9px] text-text-muted/40 font-bold uppercase tracking-wider">Bookings</div>
+              </div>
+              <div className="w-px h-6 bg-white/[0.06]" />
+              <div className="flex-1 text-center">
+                <div className="text-[0.8rem] font-extrabold text-white">0</div>
+                <div className="text-[9px] text-text-muted/40 font-bold uppercase tracking-wider">Favs</div>
+              </div>
             </div>
           </div>
-        </div>
+        </Link>
 
         <nav className="flex-1 px-3 space-y-1">
           {navItems.map((item) => {
