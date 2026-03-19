@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { FadeIn } from "@/components/common/fade-in";
+import SpotlightCard from "@/components/SpotlightCard";
 
 const testimonials = [
   {
@@ -11,6 +12,7 @@ const testimonials = [
     rating: 5,
     initials: "KW",
     color: "#74a069",
+    sport: "Tennis",
   },
   {
     name: "Mike Miller",
@@ -19,6 +21,7 @@ const testimonials = [
     rating: 5,
     initials: "MM",
     color: "#48723f",
+    sport: "Padel",
   },
   {
     name: "Sarah Chen",
@@ -27,6 +30,7 @@ const testimonials = [
     rating: 5,
     initials: "SC",
     color: "#2c452c",
+    sport: "Pickleball",
   },
   {
     name: "James Rodriguez",
@@ -35,6 +39,7 @@ const testimonials = [
     rating: 5,
     initials: "JR",
     color: "#5a8a4f",
+    sport: "Basketball",
   },
   {
     name: "Emily Park",
@@ -43,6 +48,7 @@ const testimonials = [
     rating: 5,
     initials: "EP",
     color: "#3d6b35",
+    sport: "Padel",
   },
   {
     name: "David Thompson",
@@ -51,6 +57,7 @@ const testimonials = [
     rating: 5,
     initials: "DT",
     color: "#628f58",
+    sport: "Tennis",
   },
 ];
 
@@ -60,41 +67,52 @@ const StarIcon = () => (
   </svg>
 );
 
-const TestimonialCard = ({ t }: { t: (typeof testimonials)[number] }) => (
-  <div className="w-[340px] flex-shrink-0 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-6 backdrop-blur-sm transition-all duration-300 hover:border-primary/20 hover:bg-white/[0.07] sm:w-[380px]">
-    <div className="mb-4 flex gap-0.5">
-      {Array.from({ length: t.rating }).map((_, j) => (
-        <StarIcon key={j} />
-      ))}
-    </div>
-
-    <div className="relative mb-5">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="absolute -top-1 -left-1 text-primary/20">
-        <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-      </svg>
-      <p className="pl-5 text-[0.95rem] leading-[1.7] text-white/70">
-        {t.text}
-      </p>
-    </div>
-
-    <div className="flex items-center gap-3 border-t border-white/[0.08] pt-4">
-      <div
-        className="flex size-10 items-center justify-center rounded-full text-[0.75rem] font-bold text-white"
-        style={{ backgroundColor: t.color }}
-      >
-        {t.initials}
+const TestimonialCard = ({ t, index }: { t: (typeof testimonials)[number]; index: number }) => (
+  <FadeIn delay={index * 0.1} className="h-full">
+    <SpotlightCard
+      className="flex h-full flex-col justify-between"
+      spotlightColor="rgba(217, 241, 112, 0.15)"
+    >
+      {/* Sport tag */}
+      <div className="mb-4 flex items-center justify-between">
+        <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[0.7rem] font-bold uppercase tracking-wider text-primary">
+          {t.sport}
+        </span>
+        <div className="flex gap-0.5">
+          {Array.from({ length: t.rating }).map((_, j) => (
+            <StarIcon key={j} />
+          ))}
+        </div>
       </div>
-      <div>
-        <p className="text-[0.9rem] font-semibold text-white">{t.name}</p>
-        <p className="text-[0.75rem] text-white/40">{t.role}</p>
+
+      {/* Quote */}
+      <div className="relative mb-6 flex-1">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" className="mb-3 text-primary/25">
+          <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+        </svg>
+        <p className="text-[0.95rem] leading-[1.8] text-white/70">
+          {t.text}
+        </p>
       </div>
-    </div>
-  </div>
+
+      {/* Author */}
+      <div className="flex items-center gap-3 border-t border-white/[0.08] pt-4">
+        <div
+          className="flex size-11 items-center justify-center rounded-full text-[0.8rem] font-bold text-white shadow-lg"
+          style={{ backgroundColor: t.color }}
+        >
+          {t.initials}
+        </div>
+        <div>
+          <p className="text-[0.9rem] font-semibold text-white">{t.name}</p>
+          <p className="text-[0.75rem] text-white/40">{t.role}</p>
+        </div>
+      </div>
+    </SpotlightCard>
+  </FadeIn>
 );
 
 export const Testimonials = () => {
-  const doubledTestimonials = [...testimonials, ...testimonials];
-
   return (
     <section id="testimonials" className="overflow-hidden bg-bg-dark py-20 lg:py-28">
       <div className="mx-auto max-w-[1440px] px-5 md:px-10">
@@ -102,36 +120,37 @@ export const Testimonials = () => {
           <p className="mb-3 text-[0.85rem] font-semibold uppercase tracking-[0.25em] text-primary">
             Testimonials
           </p>
-          <h2 className="text-[2.2rem] font-extrabold uppercase text-white md:text-[3rem] lg:text-[4rem]">
+          <h2 className="mb-4 text-[2.2rem] font-extrabold uppercase text-white md:text-[3rem] lg:text-[4rem]">
             Voices From The Court
           </h2>
+          <p className="mx-auto max-w-[500px] text-[0.95rem] text-white/40">
+            Hear from players and venue owners who are already part of the Courtly community.
+          </p>
         </FadeIn>
-      </div>
 
-      {/* Row 1 — scrolls left */}
-      <div className="mb-6 overflow-hidden">
-        <motion.div
-          className="flex gap-6"
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ duration: 30, ease: "linear", repeat: Infinity }}
-        >
-          {doubledTestimonials.map((t, i) => (
-            <TestimonialCard key={`row1-${i}`} t={t} />
+        {/* Grid layout with spotlight cards */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {testimonials.map((t, i) => (
+            <TestimonialCard key={i} t={t} index={i} />
           ))}
-        </motion.div>
-      </div>
+        </div>
 
-      {/* Row 2 — scrolls right */}
-      <div className="overflow-hidden">
-        <motion.div
-          className="flex gap-6"
-          animate={{ x: ["-50%", "0%"] }}
-          transition={{ duration: 35, ease: "linear", repeat: Infinity }}
-        >
-          {[...doubledTestimonials].reverse().map((t, i) => (
-            <TestimonialCard key={`row2-${i}`} t={t} />
-          ))}
-        </motion.div>
+        {/* Stats bar */}
+        <FadeIn delay={0.5}>
+          <div className="mt-14 flex flex-col items-center justify-center gap-8 rounded-2xl border border-white/[0.06] bg-white/[0.02] px-8 py-6 sm:flex-row sm:gap-12 md:gap-16">
+            {[
+              { value: "4.9", label: "Average Rating" },
+              { value: "2,000+", label: "Happy Players" },
+              { value: "200+", label: "Venues Listed" },
+              { value: "95%", label: "Would Recommend" },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center">
+                <p className="text-[1.8rem] font-extrabold text-primary">{stat.value}</p>
+                <p className="text-[0.75rem] uppercase tracking-wider text-white/40">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </FadeIn>
       </div>
     </section>
   );
