@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const protectedRoutes = ["/dashboard", "/onboarding", "/list-venue", "/player"];
+const protectedRoutes = ["/dashboard", "/onboarding", "/player"];
 const authRoutes = ["/signin", "/signup"];
 
 function isTokenValid(token: string): boolean {
@@ -37,5 +37,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/dashboard/:path*", "/onboarding/:path*", "/list-venue/:path*", "/player/:path*", "/signin", "/signup"],
+  matcher: ["/", "/dashboard/:path*", "/onboarding/:path*", "/player/:path*", "/signin", "/signup"],
 };

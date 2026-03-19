@@ -1,5 +1,10 @@
+"use client";
+
+import Image from "next/image";
 import { FadeIn } from "@/components/common/fade-in";
+import { motion } from "framer-motion";
 import { ReactNode } from "react";
+import SpotlightCard from "@/components/SpotlightCard";
 
 const InstantBookingIcon = () => (
   <svg viewBox="0 0 120 120" fill="none" className="size-full">
@@ -124,74 +129,113 @@ export const WhyChoose = () => {
       {/* Horizontal Bar */}
       <div className="absolute top-[10px] left-0 z-[1] h-[10px] w-full bg-bg-dark opacity-80 md:top-5 md:h-5 lg:top-[25px] lg:h-[25px]" />
 
-      {/* Floating ball */}
-      <div className="absolute top-[15px] right-[25px] z-[2] size-12 opacity-90">
-        <svg viewBox="0 0 100 100" fill="currentColor" className="text-primary">
-          <circle cx="50" cy="50" r="50" />
-          <path d="M 20 20 Q 50 50 20 80" stroke="#102b0f" strokeWidth="6" fill="none" />
-          <path d="M 80 20 Q 50 50 80 80" stroke="#102b0f" strokeWidth="6" fill="none" />
-        </svg>
-      </div>
+      {/* Animated Pixel Tennis Ball — top right */}
+      <motion.div
+        className="absolute top-[15px] right-[25px] z-[2]"
+        animate={{ y: [0, -15, 0], rotate: [0, 360] }}
+        transition={{
+          y: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+          rotate: { duration: 8, repeat: Infinity, ease: "linear" },
+        }}
+      >
+        <Image
+          src="/tennis_pixel.png"
+          alt=""
+          width={90}
+          height={90}
+          style={{ imageRendering: "pixelated" }}
+          className="drop-shadow-[0_0_10px_rgba(217,241,112,0.4)]"
+        />
+      </motion.div>
+
+      {/* Animated Pixel Tennis Ball — bottom left */}
+      <motion.div
+        className="absolute bottom-[40px] left-[50px] z-[2] hidden md:block"
+        animate={{ y: [0, -10, 0], rotate: [0, -360] }}
+        transition={{
+          y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+          rotate: { duration: 12, repeat: Infinity, ease: "linear" },
+        }}
+      >
+        <Image
+          src="/tennis_pixel.png"
+          alt=""
+          width={70}
+          height={70}
+          style={{ imageRendering: "pixelated" }}
+          className="opacity-50 drop-shadow-[0_0_8px_rgba(217,241,112,0.3)]"
+        />
+      </motion.div>
 
       <div className="mx-auto max-w-[1440px]">
-        <FadeIn className="mb-20 pr-5 text-center md:pr-20">
-          <h2 className="text-[2.5rem] uppercase text-text-dark md:text-[3.5rem] lg:text-[4.5rem] lg:leading-none">
+        <FadeIn className="mb-6 pr-5 text-center md:pr-20">
+          <p className="mb-3 text-[0.8rem] font-bold uppercase tracking-[0.25em] text-section-dark">
+            Why Us
+          </p>
+          <h2 className="mb-4 text-[2.5rem] uppercase text-text-dark md:text-[3.5rem] lg:text-[4.5rem] lg:leading-none">
             Why Choose Courtly
           </h2>
+          <p className="mx-auto max-w-[520px] text-[1rem] leading-relaxed text-text-muted-dark">
+            Everything you need to discover, book, and manage sports courts — all in one platform.
+          </p>
         </FadeIn>
 
-        <div className="mx-auto flex max-w-[1000px] flex-col pr-5 md:pr-20">
+        <div className="mx-auto grid max-w-[1100px] grid-cols-1 gap-6 pr-5 md:grid-cols-3 md:pr-20">
           {features.map((feature, index) => (
-            <FadeIn key={index} delay={index * 0.15}>
-            <div
-              className="group mb-5 flex cursor-pointer flex-col items-center gap-5 rounded-[20px] bg-bg-dark/[0.06] p-[30px] text-center transition-all duration-300 hover:bg-bg-dark/[0.1] md:flex-row md:justify-between md:gap-[50px] md:p-10 md:px-[50px] md:text-left"
-            >
-              <div className="flex flex-1 flex-col items-center gap-4 md:flex-row md:gap-[50px]">
-                <div className="min-w-[60px] text-[2.5rem] text-text-dark">
-                  {feature.id}
-                </div>
-
-                <div className="hidden size-[180px] shrink-0 lg:block">
-                  <div
-                    className="relative flex size-full items-center justify-center overflow-hidden rounded-3xl p-5 shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-transform duration-300 group-hover:scale-105"
-                    style={{ backgroundColor: feature.color }}
-                  >
-                    {featureIcons[index]}
+            <FadeIn key={index} delay={0.2 + index * 0.15}>
+              <SpotlightCard
+                className="group h-full cursor-pointer transition-all duration-500 hover:-translate-y-3 hover:shadow-[0_24px_48px_rgba(0,0,0,0.1)]"
+                spotlightColor={`${feature.color}35`}
+              >
+                <div className="flex h-full flex-col">
+                  {/* Top row: icon + number */}
+                  <div className="mb-5 flex items-start justify-between">
+                    <div className="size-[80px] md:size-[90px]">
+                      <div
+                        className="flex size-full items-center justify-center rounded-2xl p-3 shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-[0_12px_32px_rgba(0,0,0,0.3)]"
+                        style={{ backgroundColor: feature.color }}
+                      >
+                        {featureIcons[index]}
+                      </div>
+                    </div>
+                    <span className="text-[2.5rem] font-extrabold leading-none text-bg-dark/[0.06] transition-colors duration-300 group-hover:text-primary/20 md:text-[3rem]">
+                      {feature.id}
+                    </span>
                   </div>
-                </div>
 
-                <div className="flex-1">
-                  <h3 className="mb-[15px] text-[1.8rem] uppercase text-text-dark">
+                  {/* Title */}
+                  <h3 className="mb-2 text-[1.3rem] font-extrabold uppercase leading-tight text-text-dark md:text-[1.5rem]">
                     {feature.title}
                   </h3>
-                  <p className="max-w-[450px] text-[1.1rem] leading-[1.4] text-text-muted-dark">
+
+                  {/* Accent line */}
+                  <div className="mb-3 h-[3px] w-8 rounded-full bg-primary transition-all duration-300 group-hover:w-14" />
+
+                  {/* Description */}
+                  <p className="mb-6 flex-1 text-[0.95rem] leading-[1.7] text-text-muted-dark">
                     {feature.description}
                   </p>
-                </div>
-              </div>
 
-              <div className="md:ml-[30px]">
-                <div
-                  className={`flex size-[60px] items-center justify-center rounded-full text-text-dark transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 ${
-                    index === 0 ? "bg-primary" : "bg-white"
-                  }`}
-                >
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <line x1="7" y1="17" x2="17" y2="7" />
-                    <polyline points="7 7 17 7 17 17" />
-                  </svg>
+                  {/* Learn more link */}
+                  <div className="flex items-center gap-2 text-[0.85rem] font-semibold text-section-dark transition-all duration-300 group-hover:text-primary group-hover:gap-3">
+                    Learn more
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="transition-transform duration-300 group-hover:translate-x-1"
+                    >
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </SpotlightCard>
             </FadeIn>
           ))}
         </div>

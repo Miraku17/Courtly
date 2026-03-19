@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/common/navbar";
 import { Hero } from "@/components/common/hero";
 import { WhyChoose } from "@/components/common/why-choose";
+import { SportsMenu } from "@/components/common/sports-menu";
 import { HowItWorks } from "@/components/common/how-it-works";
 import { BookingExperiences } from "@/components/common/booking-experiences";
 import { VenuePromo } from "@/components/common/venue-promo";
@@ -14,6 +15,7 @@ export default function Home() {
       <Navbar />
       <Hero />
       <WhyChoose />
+      <SportsMenu />
       <HowItWorks />
       <BookingExperiences />
       <VenuePromo />
