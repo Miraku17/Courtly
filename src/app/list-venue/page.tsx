@@ -39,8 +39,8 @@ const features = [
   },
   {
     icon: Shield,
-    title: "Secure Payments",
-    desc: "Payments processed securely. Payouts deposited directly to your account.",
+    title: "Direct Payments",
+    desc: "Players pay you directly via your QR code. No middleman, no processing fees.",
   },
   {
     icon: TrendingUp,
@@ -97,7 +97,7 @@ export default function ListVenuePage() {
           <div className="mb-12 sm:mb-16">
             <FadeIn>
               <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.25em] text-primary">
-                Why Courtly
+                Why Courtify
               </p>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <h2 className="text-2xl font-extrabold text-white sm:text-3xl md:text-4xl">

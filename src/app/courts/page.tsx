@@ -23,10 +23,11 @@ import {
   Target,
   Dribbble,
 } from "lucide-react";
-import { mockVenues, Venue } from "@/lib/mock-data";
+import { useQuery } from "@tanstack/react-query";
+import { getPublicVenues } from "@/lib/api/venues";
 import { Navbar } from "@/components/common/navbar";
 import { Footer } from "@/components/common/footer";
-import { PublicVenueCard } from "@/components/common/public-venue-card";
+import { PublicVenueCard, PublicVenue } from "@/components/common/public-venue-card";
 import { FadeIn } from "@/components/common/fade-in";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -75,22 +76,27 @@ const trustStats = [
   { label: "Instant Booking", value: "100%", icon: Zap },
 ];
 
+function getMinPrice(venue: PublicVenue): number {
+  if (!venue.courts.length) return 0;
+  return Math.min(...venue.courts.map((c) => c.price_per_hour));
+}
+
 function filterAndSortVenues(
-  venues: Venue[],
+  venues: PublicVenue[],
   query: string,
   sport: SportFilter,
   sort: SortOption,
   amenities: string[]
-): Venue[] {
+): PublicVenue[] {
   const filtered = venues.filter((venue) => {
     const matchesQuery =
       venue.name.toLowerCase().includes(query.toLowerCase()) ||
       venue.city.toLowerCase().includes(query.toLowerCase()) ||
       venue.address.toLowerCase().includes(query.toLowerCase());
-    const matchesSport = sport === "All" || venue.sports.includes(sport);
+    const matchesSport = sport === "All" || venue.type.toLowerCase() === sport.toLowerCase();
     const matchesAmenities =
       amenities.length === 0 ||
-      amenities.every((a) => venue.amenities.includes(a));
+      amenities.every((a) => venue.tags.map((t) => t.toLowerCase()).includes(a.toLowerCase()));
 
     return matchesQuery && matchesSport && matchesAmenities;
   });
@@ -98,13 +104,9 @@ function filterAndSortVenues(
   return [...filtered].sort((a, b) => {
     switch (sort) {
       case "price-asc":
-        return a.priceFrom - b.priceFrom;
+        return getMinPrice(a) - getMinPrice(b);
       case "price-desc":
-        return b.priceFrom - a.priceFrom;
-      case "rating":
-        return b.rating - a.rating;
-      case "distance":
-        return parseFloat(a.distance) - parseFloat(b.distance);
+        return getMinPrice(b) - getMinPrice(a);
       default:
         return 0;
     }
@@ -120,15 +122,22 @@ export default function PublicCourtsPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [activeAmenities, setActiveAmenities] = useState<string[]>([]);
 
+  const { data, isLoading } = useQuery<{ venues: PublicVenue[] }>({
+    queryKey: ["public-venues"],
+    queryFn: getPublicVenues,
+  });
+
+  const allVenues: PublicVenue[] = data?.venues ?? [];
+
   const filteredVenues = filterAndSortVenues(
-    mockVenues,
+    allVenues,
     searchQuery,
     activeSport,
     activeSort,
     activeAmenities
   );
 
-  const featuredVenue = mockVenues.find((v) => v.featured);
+  const featuredVenue = allVenues[0] ?? null;
 
   const toggleAmenity = (amenity: string) => {
     setActiveAmenities((prev) =>
@@ -305,17 +314,18 @@ export default function PublicCourtsPage() {
 
       {/* ── Featured Venue ── */}
       {featuredVenue && (
-        <section className="relative mx-auto max-w-[1440px] px-4 pt-16 sm:px-6 md:px-10">
+        <section className="relative mx-auto max-w-[1440px] px-4 pt-16 pb-16 sm:px-6 md:px-10">
           <FadeIn>
             <div className="group relative overflow-hidden rounded-2xl border border-white/[0.08]">
               {/* Full-width background image */}
               <div className="relative">
                 <div className="aspect-[16/7] sm:aspect-[21/9] lg:aspect-[3/1]">
                   <Image
-                    src={featuredVenue.image}
+                    src={featuredVenue?.image_url || "/logo_final.png"}
                     alt={featuredVenue.name}
                     fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                    unoptimized
+                    className="object-contain p-12 transition-transform duration-700 group-hover:scale-[1.03] opacity-60"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-bg-dark via-bg-dark/60 to-bg-dark/20" />
                 </div>
@@ -336,27 +346,19 @@ export default function PublicCourtsPage() {
                       </h2>
 
                       <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-muted/50">
-                        <div className="flex items-center gap-1.5">
-                          <Star size={13} className="fill-primary text-primary" />
-                          <span className="font-bold text-white">{featuredVenue.rating}</span>
-                          <span className="text-text-muted/35">({featuredVenue.reviewCount})</span>
-                        </div>
-                        <span className="hidden sm:inline text-text-muted/15">|</span>
                         <span className="flex items-center gap-1.5 text-text-muted/40">
                           <MapPin size={12} />
-                          {featuredVenue.address}
+                          {featuredVenue.address}, {featuredVenue.city}
                         </span>
                         <span className="hidden sm:inline text-text-muted/15">|</span>
-                        <span className="text-text-muted/40">{featuredVenue.courtsCount} courts</span>
+                        <span className="text-text-muted/40">{featuredVenue.courts.length} courts</span>
                       </div>
 
                       <div className="flex flex-wrap gap-1.5">
-                        {featuredVenue.sports.map((sport) => (
-                          <span key={sport} className="rounded-md bg-primary/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
-                            {sport}
-                          </span>
-                        ))}
-                        {featuredVenue.amenities.slice(0, 4).map((a) => (
+                        <span className="rounded-md bg-primary/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+                          {featuredVenue.type}
+                        </span>
+                        {featuredVenue.tags.slice(0, 4).map((a) => (
                           <span key={a} className="rounded-md border border-white/[0.08] bg-white/[0.05] px-2.5 py-1 text-[10px] font-medium text-text-muted/50 backdrop-blur-sm">
                             {a}
                           </span>
@@ -368,10 +370,14 @@ export default function PublicCourtsPage() {
                     <div className="flex items-center gap-5">
                       <div>
                         <span className="block text-[10px] font-bold uppercase tracking-widest text-text-muted/30">From</span>
-                        <span className="text-2xl font-extrabold text-white sm:text-3xl">
-                          ${featuredVenue.priceFrom}
-                          <span className="text-sm font-medium text-text-muted/35">/hr</span>
-                        </span>
+                        {featuredVenue.courts.length > 0 ? (
+                          <span className="text-2xl font-extrabold text-white sm:text-3xl">
+                            ₱{getMinPrice(featuredVenue)}
+                            <span className="text-sm font-medium text-text-muted/35">/hr</span>
+                          </span>
+                        ) : (
+                          <span className="text-2xl font-extrabold text-white/30 sm:text-3xl">—</span>
+                        )}
                       </div>
                       <Link
                         href={`/player/find/${featuredVenue.id}`}
@@ -390,7 +396,7 @@ export default function PublicCourtsPage() {
       )}
 
       {/* ── Toolbar: Sport Chips + View Toggle + Sort ── */}
-      <section className="relative overflow-hidden bg-[#0c220b] px-4 pt-20 pb-16 sm:px-6 sm:pb-20 md:px-10 md:pb-24">
+      <section className="relative overflow-hidden bg-[#0c220b] px-4 pt-32 pb-16 sm:px-6 sm:pb-20 md:px-10 md:pb-24">
         {/* Section background texture */}
         <div className="pointer-events-none absolute inset-0 bg-line-grid" />
         <div className="pointer-events-none absolute right-0 top-0 h-[500px] w-[500px] rounded-full bg-primary/[0.02] blur-[120px]" />
@@ -587,7 +593,20 @@ export default function PublicCourtsPage() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
             >
-              {filteredVenues.length > 0 ? (
+              {isLoading ? (
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden animate-pulse">
+                      <div className="aspect-[16/10] bg-white/[0.04]" />
+                      <div className="p-5 space-y-3">
+                        <div className="h-4 w-3/4 rounded-lg bg-white/[0.04]" />
+                        <div className="h-3 w-1/2 rounded-lg bg-white/[0.03]" />
+                        <div className="h-3 w-1/3 rounded-lg bg-white/[0.03]" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : filteredVenues.length > 0 ? (
                 <motion.div
                   layout
                   className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
@@ -722,7 +741,7 @@ export default function PublicCourtsPage() {
               {
                 num: "03",
                 title: "Book & Play",
-                desc: "Confirm instantly with secure payment. Receive digital access codes and directions directly on your phone.",
+                desc: "Confirm instantly and pay the venue directly via their QR code. Receive directions straight to your phone.",
                 icon: Target,
                 detail: "Instant digital confirmation",
                 color: "from-orange-500/20",

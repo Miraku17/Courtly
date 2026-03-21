@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { FadeIn } from "@/components/common/fade-in";
 
-const tags = ["Free Listing", "Smart Dashboard", "Instant Payouts"];
+const tags = ["Free for 7 Days", "Smart Dashboard", "Direct QR Payments"];
 
 const stats = [
   { value: "2k", suffix: "+", label: "Active", sublabel: "Venues" },
@@ -13,7 +13,7 @@ const stats = [
 
 export const VenuePromo = () => {
   return (
-    <section className="bg-bg-light py-16 lg:py-24">
+    <section className="bg-[#eaf6df] py-16 lg:py-24">
       <div className="mx-auto max-w-[1440px] px-5 md:px-10">
         {/* Top: Image + Text */}
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
@@ -32,7 +32,7 @@ export const VenuePromo = () => {
           {/* Text content */}
           <FadeIn direction="right" delay={0.2}>
             <h2 className="mb-6 text-[2.2rem] uppercase text-text-dark md:text-[2.8rem] lg:text-[3.5rem]">
-              Grow Your Venue With Courtly
+              Grow Your Venue With Courtify
             </h2>
 
             {/* Tags */}
@@ -48,16 +48,16 @@ export const VenuePromo = () => {
             </div>
 
             <p className="mb-8 max-w-[540px] text-[1.05rem] leading-[1.7] text-text-muted-dark">
-              Turn your sports facility into a thriving business. Courtly gives venue owners the tools to reach thousands of local players, manage bookings effortlessly, and maximize court utilization — all completely free. No commissions, no hidden fees.
+              Turn your sports facility into a thriving business. Courtify gives venue owners the tools to reach thousands of local players, manage bookings effortlessly, and maximize court utilization — free for 7 days, no card required.
             </p>
 
             {/* Highlight stats row */}
             <div className="mb-8 flex items-center gap-8">
               <div>
                 <p className="text-[2rem] font-bold text-text-dark">
-                  100%
+                  7 Days
                 </p>
-                <p className="text-[0.85rem] text-text-muted-dark">Free for Owners</p>
+                <p className="text-[0.85rem] text-text-muted-dark">Free Trial</p>
               </div>
               <div className="h-10 w-px bg-text-dark/15" />
               <div>

@@ -11,11 +11,11 @@ const experiences = [
         <line x1="3" y1="10" x2="21" y2="10" />
       </svg>
     ),
-    title: "Instant Court Booking",
+    title: "Direct Payment via QR Code",
     description:
-      "Reserve any available court in seconds. Pick your sport, choose a time slot, and confirm — no calls, no waiting.",
+      "Scan the venue's QR code to pay the owner directly — no middleman, no processing delays. Fast, transparent, and hassle-free.",
     image: "/instant.png",
-    imageAlt: "Instant Court Booking",
+    imageAlt: "Direct Payment via QR Code",
   },
   {
     icon: (
@@ -52,7 +52,10 @@ import { FadeIn } from "@/components/common/fade-in";
 
 export const BookingExperiences = () => {
   return (
-    <section className="bg-bg-light py-16 lg:py-24">
+    <section 
+      className="py-16 lg:py-24" 
+      style={{ backgroundColor: "#eaf6df" }}
+    >
       <div className="mx-auto max-w-[1440px] px-5 md:px-10">
         {/* Header: description left, title right */}
         <FadeIn className="mb-10 flex flex-col gap-6 lg:mb-14 lg:flex-row lg:items-end lg:justify-between">

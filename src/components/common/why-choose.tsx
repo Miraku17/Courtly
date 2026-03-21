@@ -122,12 +122,19 @@ export const WhyChoose = () => {
   return (
     <section
       id="why-choose"
-      className="relative overflow-hidden bg-bg-light pt-[100px] pr-0 pb-[60px] pl-10 md:pt-[120px] md:pl-[60px] lg:pt-[140px] lg:pb-[100px] lg:pl-20"
+      className="relative overflow-hidden pt-[100px] pr-0 pb-[60px] pl-10 md:pt-[120px] md:pl-[60px] lg:pt-[140px] lg:pb-[100px] lg:pl-20"
+      style={{ backgroundColor: "#eaf6df" }}
     >
       {/* Vertical Bar */}
-      <div className="absolute top-0 left-[10px] z-[1] h-full w-[10px] bg-bg-dark opacity-80 md:left-5 md:w-5 lg:left-[25px] lg:w-[25px]" />
+      <div 
+        className="absolute top-0 left-[10px] z-[1] h-full w-[10px] opacity-80 md:left-5 md:w-5 lg:left-[25px] lg:w-[25px]" 
+        style={{ backgroundColor: "#3c5438" }}
+      />
       {/* Horizontal Bar */}
-      <div className="absolute top-[10px] left-0 z-[1] h-[10px] w-full bg-bg-dark opacity-80 md:top-5 md:h-5 lg:top-[25px] lg:h-[25px]" />
+      <div 
+        className="absolute top-[10px] left-0 z-[1] h-[10px] w-full opacity-80 md:top-5 md:h-5 lg:top-[25px] lg:h-[25px]" 
+        style={{ backgroundColor: "#3c5438" }}
+      />
 
       {/* Animated Pixel Tennis Ball — top right */}
       <motion.div
@@ -173,7 +180,7 @@ export const WhyChoose = () => {
             Why Us
           </p>
           <h2 className="mb-4 text-[2.5rem] uppercase text-text-dark md:text-[3.5rem] lg:text-[4.5rem] lg:leading-none">
-            Why Choose Courtly
+            Why Choose Courtify
           </h2>
           <p className="mx-auto max-w-[520px] text-[1rem] leading-relaxed text-text-muted-dark">
             Everything you need to discover, book, and manage sports courts — all in one platform.

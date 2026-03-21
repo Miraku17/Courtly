@@ -4,14 +4,14 @@ export const HowItWorks = () => {
   const playerSteps = [
     { step: "01", title: "Search Courts", description: "Browse venues near you filtered by sport, location, and amenities." },
     { step: "02", title: "Check Availability", description: "View real-time schedules and select a time slot that works for you." },
-    { step: "03", title: "Book Instantly", description: "Confirm your reservation in seconds with secure online payment." },
+    { step: "03", title: "Book Instantly", description: "Confirm your reservation in seconds. Pay the venue owner directly via their QR code." },
     { step: "04", title: "Play & Review", description: "Show up, enjoy your game, and leave a review for the community." },
   ];
 
   const ownerSteps = [
     { step: "01", title: "Create Your Listing", description: "Add your venue details, photos, pricing, and available time slots." },
     { step: "02", title: "Set Your Schedule", description: "Define availability windows and let the platform handle the rest." },
-    { step: "03", title: "Accept & Earn", description: "Receive bookings automatically and track revenue from your dashboard." },
+    { step: "03", title: "Accept & Earn", description: "Receive bookings automatically. Players pay you directly via your QR code — no middleman." },
   ];
 
   return (

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 
 const navLinks = [
@@ -68,18 +69,8 @@ export const Navbar = () => {
           className="flex items-center gap-2 text-[1.4rem] uppercase text-[#ffffff] sm:gap-3 sm:text-[1.8rem] lg:flex-1 lg:justify-center"
 
         >
-          <span className="flex items-center">
-            <svg
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              width="22"
-              height="22"
-              className="text-primary sm:size-6"
-            >
-              <path d="M12 2C9.5 2 8 4 8 6.5C8 9 10.5 11 12 11C13.5 11 16 9 16 6.5C16 4 14.5 2 12 2ZM12 22C14.5 22 16 20 16 17.5C16 15 13.5 13 12 13C10.5 13 8 15 8 17.5C8 20 9.5 22 12 22ZM2 12C2 14.5 4 16 6.5 16C9 16 11 13.5 11 12C11 10.5 9 8 6.5 8C4 8 2 9.5 2 12ZM22 12C22 9.5 20 8 17.5 8C15 8 13 10.5 13 12C13 13.5 15 16 17.5 16C20 16 22 14.5 22 12Z" />
-            </svg>
-          </span>
-          COURTLY
+          <Image src="/logo_final.png" alt="Courtify" width={56} height={56} className="size-12 rounded-full object-cover sm:size-14" />
+          <span className="font-panchang font-extrabold">COURTIFY</span>
         </Link>
 
         {/* Right side */}

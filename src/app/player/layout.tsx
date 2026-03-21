@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
@@ -10,6 +11,7 @@ import {
   CreditCard,
   Settings,
   LogOut,
+  HelpCircle,
   User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -39,95 +41,41 @@ export default function PlayerLayout({
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
+  const { data: profileData } = useQuery({
+    queryKey: ["profile"],
+    queryFn: getProfile,
+  });
+
+  const displayName = profileData?.profile?.first_name && profileData?.profile?.last_name
+    ? `${profileData.profile.first_name} ${profileData.profile.last_name}`
+    : user?.email?.split("@")[0] || "Player";
+
   const handleSignOut = async () => {
     setIsSigningOut(true);
     try {
       await signOut();
     } catch {
-      // Even if the API call fails, we still clear client-side state
-      // The middleware will redirect on next protected route visit anyway
+      // Clear client-side state even if API fails
     }
     clearUser();
     toast.success("Signed out successfully");
     router.push("/signin");
   };
 
-
-  const { data, isLoading } = useQuery({
-    queryKey: ["profile"],
-    queryFn: getProfile,
-  });
-
   return (
-    <div className="flex min-h-screen bg-bg-dark text-text-main font-mona">
+    <div className="flex min-h-screen bg-bg-light font-clash">
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex w-64 flex-col border-r border-white/[0.06] bg-bg-dark/80 backdrop-blur-2xl fixed h-full z-50">
-        <div className="p-7 pb-6">
-          <Link href="/" className="flex items-center gap-2 text-[1.4rem] uppercase text-white">
-            <svg
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              width="22"
-              height="22"
-              className="text-primary"
-            >
-              <path d="M12 2C9.5 2 8 4 8 6.5C8 9 10.5 11 12 11C13.5 11 16 9 16 6.5C16 4 14.5 2 12 2ZM12 22C14.5 22 16 20 16 17.5C16 15 13.5 13 12 13C10.5 13 8 15 8 17.5C8 20 9.5 22 12 22ZM2 12C2 14.5 4 16 6.5 16C9 16 11 13.5 11 12C11 10.5 9 8 6.5 8C4 8 2 9.5 2 12ZM22 12C22 9.5 20 8 17.5 8C15 8 13 10.5 13 12C13 13.5 15 16 17.5 16C20 16 22 14.5 22 12Z" />
-            </svg>
-            COURTLY
+      <aside className="hidden md:flex w-64 flex-col fixed h-full z-50 bg-bg-dark">
+        {/* Branding */}
+        <div className="px-6 pt-7 pb-5 border-b border-white/8">
+          <Link href="/" className="flex items-center gap-2.5">
+            <Image src="/logo_final.png" alt="Courtify" width={44} height={44} className="size-11 rounded-full object-cover" />
+            <span className="font-panchang text-white font-bold text-[1.1rem] tracking-tight">COURTIFY</span>
           </Link>
         </div>
 
-        {/* Player Card */}
-        <Link
-          href="/player/settings"
-          className="mx-3 mb-6 rounded-2xl overflow-hidden group block transition-all duration-300 hover:scale-[1.02]"
-        >
-          <div className="relative bg-gradient-to-br from-primary/20 via-primary/5 to-transparent border border-primary/15 rounded-2xl p-4 hover:border-primary/30 transition-all">
-            {/* Decorative glow */}
-            <div className="absolute top-0 right-0 w-20 h-20 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
-
-            <div className="relative flex items-center gap-3 mb-3">
-              <div className="relative">
-                <div className="size-12 rounded-xl bg-primary/20 border-2 border-primary/30 flex items-center justify-center overflow-hidden group-hover:border-primary/50 transition-colors shadow-lg shadow-primary/10">
-                  {data?.profile?.avatar_url ? (
-                    <img src={data.profile.avatar_url} alt="Avatar" className="size-full object-cover" />
-                  ) : (
-                    <User size={20} className="text-primary" />
-                  )}
-                </div>
-                <div className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full bg-emerald-500 border-2 border-bg-dark shadow-sm shadow-emerald-500/30" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-[0.85rem] font-extrabold text-white truncate group-hover:text-primary transition-colors tracking-tight">
-                  {data?.profile?.first_name && data?.profile?.last_name
-                    ? `${data.profile.first_name} ${data.profile.last_name}`
-                    : user?.email?.split("@")[0] || "Player"}
-                </div>
-                <div className="text-[10px] text-primary/60 font-bold uppercase tracking-widest mt-0.5">Player</div>
-              </div>
-            </div>
-
-            {/* Stats bar */}
-            <div className="flex items-center gap-3 pt-3 border-t border-white/[0.06]">
-              <div className="flex-1 text-center">
-                <div className="text-[0.8rem] font-extrabold text-white">0</div>
-                <div className="text-[9px] text-text-muted/40 font-bold uppercase tracking-wider">Matches</div>
-              </div>
-              <div className="w-px h-6 bg-white/[0.06]" />
-              <div className="flex-1 text-center">
-                <div className="text-[0.8rem] font-extrabold text-white">0</div>
-                <div className="text-[9px] text-text-muted/40 font-bold uppercase tracking-wider">Bookings</div>
-              </div>
-              <div className="w-px h-6 bg-white/[0.06]" />
-              <div className="flex-1 text-center">
-                <div className="text-[0.8rem] font-extrabold text-white">0</div>
-                <div className="text-[9px] text-text-muted/40 font-bold uppercase tracking-wider">Favs</div>
-              </div>
-            </div>
-          </div>
-        </Link>
-
-        <nav className="flex-1 px-3 space-y-1">
+        {/* Navigation */}
+        <nav className="flex-1 px-3 pt-4 space-y-0.5">
           {navItems.map((item) => {
             const isActive = pathname.startsWith(item.href);
             return (
@@ -135,43 +83,71 @@ export default function PlayerLayout({
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group text-[0.9rem]",
+                  "relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 active:scale-[0.98] text-[0.85rem]",
                   isActive
-                    ? "bg-primary text-text-dark font-bold"
-                    : "text-text-muted/70 hover:bg-white/[0.04] hover:text-white font-medium"
+                    ? "text-white bg-white/12 font-semibold"
+                    : "text-white/50 hover:text-white/80 hover:bg-white/6 font-medium"
                 )}
               >
-                <item.icon className={cn("size-[18px]", isActive ? "text-text-dark" : "group-hover:text-primary transition-colors")} />
+                <item.icon className={cn("size-[17px]", isActive ? "text-white" : "")} strokeWidth={isActive ? 2.2 : 1.8} />
                 {item.name}
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-3 mt-auto border-t border-white/[0.06]">
+        {/* Bottom Section */}
+        <div className="mt-auto px-3 pb-5 pt-3 border-t border-white/8 space-y-0.5">
+          <Link
+            href="#"
+            className="flex items-center gap-3 px-4 py-2.5 text-white/35 hover:text-white/70 transition-all duration-200 text-[0.85rem] rounded-xl hover:bg-white/6"
+          >
+            <HelpCircle size={17} strokeWidth={1.8} />
+            Support
+          </Link>
           <button
             onClick={() => setShowSignOutConfirm(true)}
-            className="group flex w-full items-center gap-3 px-4 py-3 rounded-xl text-text-muted/60 hover:bg-red-500/[0.08] hover:text-red-400 transition-all duration-200 text-[0.9rem] font-medium"
+            className="flex w-full items-center gap-3 px-4 py-2.5 text-white/35 hover:text-red-400 transition-all duration-200 text-[0.85rem] rounded-xl hover:bg-red-500/10"
           >
-            <div className="flex size-8 items-center justify-center rounded-lg bg-red-500/[0.06] group-hover:bg-red-500/15 transition-colors">
-              <LogOut size={15} className="group-hover:text-red-400 transition-colors" />
-            </div>
-            <span>Sign Out</span>
+            <LogOut size={17} strokeWidth={1.8} />
+            Logout
           </button>
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <main className="flex-1 md:ml-64 pb-24 md:pb-0 min-h-screen bg-bg-dashboard">
+      {/* Top Navbar - Desktop */}
+      <header className="hidden md:flex fixed top-0 right-0 w-[calc(100%-16rem)] z-30 h-14 bg-bg-light/80 backdrop-blur-xl border-b border-section-dark/8 items-center justify-between px-8">
+        <div className="flex-1" />
+
+        {/* Right — Profile */}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
+            <div className="text-right">
+              <p className="text-[0.75rem] font-bold text-text-dark leading-tight">{displayName}</p>
+              <p className="text-[0.6rem] text-text-muted-dark/50">Player</p>
+            </div>
+            <div className="size-9 rounded-xl border border-section-dark/10 bg-white/60 flex items-center justify-center overflow-hidden">
+              {profileData?.profile?.avatar_url ? (
+                <img src={profileData.profile.avatar_url} alt="Avatar" className="size-full object-cover" />
+              ) : (
+                <User size={16} className="text-text-muted-dark/50" />
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1 md:ml-64 pb-24 md:pb-0 min-h-screen bg-bg-light md:pt-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           {children}
         </div>
       </main>
 
       {/* Bottom Tab Bar - Mobile */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-bg-dark/90 backdrop-blur-2xl border-t border-white/[0.06]">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-section-dark">
         <div className="flex items-center justify-around px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
-          {navItems.map((item) => {
+          {navItems.filter((item) => item.name !== "Settings").map((item) => {
             const isActive = pathname.startsWith(item.href);
             return (
               <Link
@@ -179,13 +155,13 @@ export default function PlayerLayout({
                 href={item.href}
                 className={cn(
                   "relative flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all duration-200",
-                  isActive ? "text-primary" : "text-text-muted/50"
+                  isActive ? "text-white" : "text-white/35"
                 )}
               >
                 {isActive && (
                   <motion.div
-                    layoutId="mobile-tab"
-                    className="absolute -top-2 w-6 h-0.5 rounded-full bg-primary"
+                    layoutId="mobile-tab-player"
+                    className="absolute -top-2 w-6 h-0.5 rounded-full bg-white"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
@@ -205,51 +181,43 @@ export default function PlayerLayout({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-100 flex items-center justify-center bg-black/70 backdrop-blur-md p-4"
+            className="fixed inset-0 z-100 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
             onClick={() => !isSigningOut && setShowSignOutConfirm(false)}
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              className="relative w-full max-w-[360px] overflow-hidden rounded-2xl border border-white/[0.08] bg-bg-dark shadow-2xl shadow-black/40"
+              className="relative w-full max-w-[360px] overflow-hidden rounded-2xl border border-section-dark/10 bg-white shadow-2xl shadow-black/10"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Red glow accent */}
-              <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-40 h-40 bg-red-500/10 rounded-full blur-[80px] pointer-events-none" />
-
               <div className="relative p-6 pt-8 flex flex-col items-center text-center">
-                {/* Icon */}
                 <motion.div
                   initial={{ scale: 0.5, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.1 }}
-                  className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-b from-red-500/20 to-red-500/5 border border-red-500/15 mb-5"
+                  className="flex size-14 items-center justify-center rounded-2xl bg-red-50 border border-red-100 mb-5"
                 >
-                  <LogOut size={22} className="text-red-400" />
+                  <LogOut size={22} className="text-red-500" />
                 </motion.div>
-
-                <h3 className="text-[1.1rem] font-bold text-white mb-1.5">
-                  Sign out of Courtly?
-                </h3>
-                <p className="text-[0.85rem] text-text-muted/50 leading-relaxed max-w-[260px]">
+                <h3 className="text-[1.1rem] font-bold text-text-dark mb-1.5">Sign out?</h3>
+                <p className="text-[0.85rem] text-text-muted-dark/60 leading-relaxed max-w-[260px]">
                   You&apos;ll need to sign in again to access your bookings and account.
                 </p>
               </div>
-
               <div className="p-4 pt-2 flex gap-3">
                 <button
                   onClick={() => setShowSignOutConfirm(false)}
                   disabled={isSigningOut}
-                  className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.04] py-2.5 text-[0.85rem] font-semibold text-white transition-all hover:bg-white/[0.08] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+                  className="flex-1 rounded-xl border border-section-dark/10 bg-section-dark/5 py-2.5 text-[0.85rem] font-semibold text-text-dark transition-all hover:bg-section-dark/10 active:scale-[0.98] disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSignOut}
                   disabled={isSigningOut}
-                  className="flex-1 rounded-xl bg-red-500 py-2.5 text-[0.85rem] font-semibold text-white transition-all hover:bg-red-600 active:scale-[0.98] disabled:opacity-60 disabled:pointer-events-none shadow-lg shadow-red-500/20"
+                  className="flex-1 rounded-xl bg-red-500 py-2.5 text-[0.85rem] font-semibold text-white transition-all hover:bg-red-600 active:scale-[0.98] disabled:opacity-60"
                 >
                   {isSigningOut ? (
                     <span className="flex items-center justify-center gap-2">

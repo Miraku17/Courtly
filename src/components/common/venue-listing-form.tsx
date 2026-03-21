@@ -49,7 +49,7 @@ export const VenueListingForm = () => {
                   },
                   {
                     q: "Is there a cost?",
-                    a: "No. Listing your venue on Courtly is free. We charge a small service fee to players.",
+                    a: "No. Courtify is completely free — no fees for owners or players. Payments go directly to you via your QR code.",
                   },
                   {
                     q: "Can I manage multiple venues?",

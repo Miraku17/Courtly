@@ -23,7 +23,7 @@ const steps = [
     number: "03",
     title: "Start Getting Bookings",
     description:
-      "Go live and get discovered. Players find and book your courts directly through Courtly.",
+      "Go live and get discovered. Players find and book your courts directly through Courtify.",
     icon: Rocket,
   },
 ];

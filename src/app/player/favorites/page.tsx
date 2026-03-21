@@ -16,8 +16,8 @@ export default function FavoritesPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white mb-1">Favorites</h1>
-        <p className="text-text-muted/60 text-sm sm:text-base">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-section-dark mb-1">Favorites</h1>
+        <p className="text-section-dark/50 text-sm sm:text-base">
           {favoriteVenues.length > 0
             ? `${favoriteVenues.length} saved venue${favoriteVenues.length > 1 ? "s" : ""} for quick access.`
             : "Your saved courts and venues for quick access."}
@@ -42,18 +42,18 @@ export default function FavoritesPage() {
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="text-center py-24 bg-white/[0.02] border border-dashed border-white/[0.08] rounded-2xl px-6"
+          className="text-center py-24 bg-[#f5f5f5] shadow-sm border border-dashed border-section-dark/10 rounded-2xl px-6"
         >
-          <div className="inline-flex items-center justify-center size-20 rounded-2xl bg-white/[0.04] text-text-muted/30 mb-5">
+          <div className="inline-flex items-center justify-center size-20 rounded-2xl bg-section-dark/5 text-section-dark/30 mb-5">
             <Heart size={40} strokeWidth={1.5} />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">No favorites yet</h3>
-          <p className="text-text-muted/50 text-sm max-w-xs mx-auto mb-8">
+          <h3 className="text-xl font-bold text-section-dark mb-2">No favorites yet</h3>
+          <p className="text-section-dark/50 text-sm max-w-xs mx-auto mb-8">
             Explore courts and save your go-to spots to find them easily next time.
           </p>
           <Link
             href="/player/find"
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-primary text-text-dark font-bold text-sm hover:brightness-110 transition-all"
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-section-dark text-white font-bold text-sm hover:bg-section-dark/90 transition-all"
           >
             <Search size={16} />
             <span>Discover Venues</span>

@@ -6,12 +6,12 @@ export const CTASection = () => {
     <section className="bg-bg-dark px-4 py-16 text-center text-text-main sm:px-5 md:py-20 lg:py-[100px]">
       <div className="mx-auto max-w-[1440px]">
         <FadeIn>
-          <h2 className="mb-5 text-[2rem] sm:text-[2.5rem] md:text-[3rem]">List Your Venue on Courtly</h2>
+          <h2 className="mb-5 text-[2rem] sm:text-[2.5rem] md:text-[3rem]">List Your Venue on Courtify</h2>
         </FadeIn>
         <FadeIn delay={0.15}>
           <p className="mb-10 text-[1rem] text-text-muted sm:text-[1.25rem]">
             Reach more players, manage bookings effortlessly, and grow your sports
-            venue — all from one free platform.
+            venue — try it free for 7 days.
           </p>
         </FadeIn>
         <FadeIn delay={0.3}>

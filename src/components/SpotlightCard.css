@@ -10,6 +10,11 @@
   --spotlight-color: rgba(217, 241, 112, 0.25);
 }
 
+.card-spotlight.dark {
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
 .card-spotlight::before {
   content: '';
   position: absolute;
@@ -26,4 +31,10 @@
 .card-spotlight:hover::before,
 .card-spotlight:focus-within::before {
   opacity: 1;
+}
+
+/* Dark variant for dashboard */
+.card-spotlight.dashboard-card {
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
