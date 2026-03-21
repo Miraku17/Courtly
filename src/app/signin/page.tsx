@@ -23,7 +23,7 @@ export default function SignInPage() {
     onSuccess: (data) => {
       setUser({ userId: data.user.id, email: data.user.email, role: data.user.role });
       toast.success("Welcome back!");
-      const destination = data.user.role === "PLAYER" ? "/player/bookings" : "/dashboard";
+      const destination = data.user.role === "PLAYER" ? "/player/bookings" : "/venue-owner";
       setTimeout(() => router.push(destination), 1000);
     },
     onError: (error: any) => {

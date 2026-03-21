@@ -32,12 +32,24 @@ export default function SignUpPage() {
       role: "PLAYER" | "VENUE_OWNER";
     }) => signUp(data),
     onSuccess: (data) => {
-      setUser(data);
+      setUser({
+        userId: data.user.id,
+        email: data.user.email,
+        role: data.user.role,
+      });
       toast.success("Account created!");
-      router.push("/dashboard");
+      const destination = data.user.role === "PLAYER" ? "/player/bookings" : "/onboarding/venue-owner";
+      router.push(destination);
     },
-    onError: (error) => {
-      toast.error("Something went wrong. Please try again.");
+    onError: (error: any) => {
+      const messages = error?.response?.data?.message;
+      if (Array.isArray(messages)) {
+        messages.forEach((msg: string) => toast.error(msg));
+      } else if (typeof messages === "string") {
+        toast.error(messages);
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
     },
   });
 

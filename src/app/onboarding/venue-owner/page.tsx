@@ -262,6 +262,7 @@ export default function VenueOwnerOnboarding() {
   const nextStep = () => setStep((prev) => (prev < 4 ? ((prev + 1) as Step) : prev));
   const prevStep = () => setStep((prev) => (prev > 1 ? ((prev - 1) as Step) : prev));
 
+
   const updateFormData = (data: Partial<typeof formData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
   };

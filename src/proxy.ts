@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const protectedRoutes = ["/dashboard", "/onboarding", "/player"];
+const protectedRoutes = ["/dashboard", "/onboarding", "/player", "/venue-owner"];
 const authRoutes = ["/signin", "/signup"];
 
 function isTokenValid(token: string): boolean {
@@ -29,7 +29,7 @@ export function proxy(request: NextRequest) {
   if (isValid && (isAuthRoute || path === "/")) {
     const payload = JSON.parse(atob(token!.split(".")[1]));
     const role = payload.user_metadata?.role;
-    const destination = role === "PLAYER" ? "/player/bookings" : "/dashboard";
+    const destination = role === "PLAYER" ? "/player/bookings" : "/venue-owner";
     return NextResponse.redirect(new URL(destination, request.url));
   }
 
@@ -37,5 +37,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/dashboard/:path*", "/onboarding/:path*", "/player/:path*", "/signin", "/signup"],
+  matcher: ["/", "/dashboard/:path*", "/onboarding/:path*", "/player/:path*", "/venue-owner/:path*", "/signin", "/signup"],
 };
