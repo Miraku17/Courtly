@@ -40,7 +40,7 @@ export const Hero = () => {
           <FadeIn delay={0.1}>
             <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-[0.85rem] font-bold tracking-wide text-primary backdrop-blur-md">
               <span className="flex size-2 animate-pulse rounded-full bg-primary" />
-              EXPERIENCE THE COURTLY LIFESTYLE 🎾
+              EXPERIENCE THE COURTIFY LIFESTYLE 🎾
             </div>
           </FadeIn>
 
@@ -97,7 +97,7 @@ export const Hero = () => {
             <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[40px] border border-white/5 shadow-2xl lg:aspect-[3.5/4.5]">
               <Image
                 src="/hero_1.webp"
-                alt="Courtly Sports Action"
+                alt="Courtify Sports Action"
                 fill
                 className="object-cover object-right transition-transform duration-700 hover:scale-105"
                 priority

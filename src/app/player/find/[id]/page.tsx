@@ -58,9 +58,9 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
       >
         <Link
           href="/player/find"
-          className="flex items-center gap-2 text-text-muted/60 hover:text-white transition-colors group"
+          className="flex items-center gap-2 text-section-dark/50 hover:text-section-dark transition-colors group"
         >
-          <div className="size-9 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center group-hover:border-white/[0.12] transition-colors">
+          <div className="size-9 rounded-xl bg-[#f5f5f5] border border-section-dark/10 flex items-center justify-center group-hover:border-section-dark/20 transition-colors">
             <ChevronLeft size={18} />
           </div>
           <span className="font-bold text-sm hidden sm:inline">Back to Search</span>
@@ -70,11 +70,11 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
           className={cn(
             "flex items-center gap-2 px-5 py-2 rounded-xl border text-sm font-bold transition-all",
             isFav
-              ? "border-primary/30 bg-primary/10 text-primary"
-              : "border-white/[0.08] text-white/70 hover:border-primary/30 hover:text-primary"
+              ? "border-section-dark/20 bg-section-dark/10 text-section-dark"
+              : "border-section-dark/10 text-section-dark/50 hover:border-section-dark/20 hover:text-section-dark"
           )}
         >
-          <Heart size={16} className={cn(isFav && "fill-primary")} />
+          <Heart size={16} className={cn(isFav && "fill-section-dark")} />
           <span className="hidden sm:inline">{isFav ? "Saved" : "Save"}</span>
         </button>
       </motion.div>
@@ -86,15 +86,15 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
         transition={{ duration: 0.45, delay: 0.08 }}
         className="grid grid-cols-1 lg:grid-cols-12 gap-3 h-[280px] sm:h-[360px] lg:h-[420px]"
       >
-        <div className="lg:col-span-8 relative rounded-2xl lg:rounded-3xl overflow-hidden border border-white/[0.06]">
+        <div className="lg:col-span-8 relative rounded-2xl lg:rounded-3xl overflow-hidden border border-section-dark/10">
           <Image src={venue.image} alt={venue.name} fill className="object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-bg-dark/40 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
         </div>
         <div className="hidden lg:grid lg:col-span-4 grid-rows-2 gap-3">
-          <div className="relative rounded-2xl overflow-hidden border border-white/[0.06]">
+          <div className="relative rounded-2xl overflow-hidden border border-section-dark/10">
             <Image src={venue.image} alt="Gallery 1" fill className="object-cover brightness-75" />
           </div>
-          <div className="relative rounded-2xl overflow-hidden border border-white/[0.06] group cursor-pointer">
+          <div className="relative rounded-2xl overflow-hidden border border-section-dark/10 group cursor-pointer">
             <Image src={venue.image} alt="Gallery 2" fill className="object-cover brightness-50" />
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="text-white font-bold text-lg bg-white/10 backdrop-blur-sm px-5 py-2 rounded-xl border border-white/10">
@@ -119,21 +119,21 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
               {venue.sports.map((s) => (
                 <span
                   key={s}
-                  className="px-3 py-1 rounded-lg bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-wider border border-primary/15"
+                  className="px-3 py-1 rounded-lg bg-section-dark/10 text-section-dark text-[11px] font-bold uppercase tracking-wider border border-section-dark/15"
                 >
                   {s}
                 </span>
               ))}
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">{venue.name}</h1>
-            <div className="flex flex-wrap items-center gap-5 text-text-muted/60 text-sm">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-section-dark mb-4">{venue.name}</h1>
+            <div className="flex flex-wrap items-center gap-5 text-section-dark/50 text-sm">
               <div className="flex items-center gap-1.5">
-                <Star size={16} className="fill-primary text-primary" />
-                <span className="text-white font-bold">{venue.rating}</span>
+                <Star size={16} className="fill-section-dark text-section-dark" />
+                <span className="text-section-dark font-bold">{venue.rating}</span>
                 <span>({venue.reviewCount} reviews)</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <MapPin size={16} className="text-primary/70" />
+                <MapPin size={16} className="text-section-dark/40" />
                 <span>{venue.address}</span>
               </div>
             </div>
@@ -141,8 +141,8 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
 
           {/* About */}
           <div>
-            <h3 className="text-lg font-bold text-white mb-3">About</h3>
-            <p className="text-text-muted/60 leading-relaxed">
+            <h3 className="text-lg font-bold text-section-dark mb-3">About</h3>
+            <p className="text-section-dark/60 leading-relaxed">
               Experience world-class facilities at {venue.name}. Our venue features state-of-the-art courts,
               professional-grade lighting, and a vibrant community atmosphere. Whether you&apos;re a seasoned pro
               or just starting out, we provide the perfect environment for your game.
@@ -151,17 +151,17 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
 
           {/* Amenities */}
           <div>
-            <h3 className="text-lg font-bold text-white mb-4">Amenities</h3>
+            <h3 className="text-lg font-bold text-section-dark mb-4">Amenities</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {amenities.map((amenity) => (
                 <div
                   key={amenity.label}
-                  className="flex items-center gap-3 p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06]"
+                  className="flex items-center gap-3 p-3.5 rounded-xl bg-[#f5f5f5] border border-section-dark/10 shadow-sm"
                 >
-                  <div className="size-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                  <div className="size-9 rounded-lg bg-section-dark/10 flex items-center justify-center text-section-dark flex-shrink-0">
                     <amenity.icon size={16} />
                   </div>
-                  <span className="text-sm text-text-muted/70 font-medium">{amenity.label}</span>
+                  <span className="text-sm text-section-dark/60 font-medium">{amenity.label}</span>
                 </div>
               ))}
             </div>
@@ -169,15 +169,15 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
 
           {/* Court Availability */}
           <div>
-            <h3 className="text-lg font-bold text-white mb-4">Court Availability</h3>
+            <h3 className="text-lg font-bold text-section-dark mb-4">Court Availability</h3>
             <div className="space-y-4">
               {[1, 2].map((court) => (
-                <div key={court} className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] space-y-4">
+                <div key={court} className="p-5 rounded-2xl bg-[#f5f5f5] border border-section-dark/10 shadow-sm space-y-4">
                   <div className="flex justify-between items-center">
-                    <h4 className="text-sm font-bold text-white">
-                      Court {court} <span className="text-text-muted/40 font-medium">({court === 1 ? "Indoor" : "Outdoor"})</span>
+                    <h4 className="text-sm font-bold text-section-dark">
+                      Court {court} <span className="text-section-dark/40 font-medium">({court === 1 ? "Indoor" : "Outdoor"})</span>
                     </h4>
-                    <span className="flex items-center gap-1.5 text-[11px] font-bold text-primary/70 uppercase tracking-wider">
+                    <span className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 uppercase tracking-wider">
                       <Check size={12} />
                       Available Today
                     </span>
@@ -191,10 +191,10 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                         className={cn(
                           "py-2.5 rounded-xl text-xs font-bold transition-all",
                           !slot.available
-                            ? "bg-white/[0.02] border border-white/[0.03] text-text-muted/20 cursor-not-allowed"
+                            ? "bg-section-dark/5 border border-section-dark/8 text-section-dark/20 cursor-not-allowed"
                             : selectedTime === slot.time
-                              ? "bg-primary text-text-dark border border-primary shadow-md shadow-primary/15"
-                              : "bg-bg-dark border border-white/[0.08] text-white/70 hover:border-primary/40 hover:text-primary"
+                              ? "bg-section-dark text-white border border-section-dark shadow-md shadow-section-dark/15"
+                              : "bg-white border border-section-dark/10 text-section-dark/60 hover:border-section-dark/20 hover:text-section-dark shadow-sm"
                         )}
                       >
                         {slot.time}
@@ -207,34 +207,34 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
           </div>
 
           {/* Reviews */}
-          <div className="space-y-6 pt-6 border-t border-white/[0.06]">
+          <div className="space-y-6 pt-6 border-t border-section-dark/10">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-bold text-white">Reviews</h3>
-              <button className="text-primary font-bold text-sm hover:underline">Write a Review</button>
+              <h3 className="text-lg font-bold text-section-dark">Reviews</h3>
+              <button className="text-section-dark font-bold text-sm hover:underline">Write a Review</button>
             </div>
             <div className="space-y-5">
               {[
                 { name: "John D.", date: "Mar 12, 2026", text: "Amazing facility! The courts are well-maintained and the staff is very friendly. The lighting for night games is perfect." },
                 { name: "Sarah K.", date: "Mar 8, 2026", text: "Great venue for padel. Love the indoor courts. A bit pricey but worth it for the quality. Will definitely come back." },
               ].map((review, i) => (
-                <div key={i} className="p-5 rounded-2xl bg-white/[0.02] border border-white/[0.04] space-y-3">
+                <div key={i} className="p-5 rounded-2xl bg-[#f5f5f5] border border-section-dark/10 shadow-sm space-y-3">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-3">
-                      <div className="size-9 rounded-full bg-primary/10 border border-primary/15 flex items-center justify-center text-xs font-bold text-primary">
+                      <div className="size-9 rounded-full bg-section-dark/10 border border-section-dark/10 flex items-center justify-center text-xs font-bold text-section-dark">
                         {review.name.slice(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <div className="text-white font-bold text-sm">{review.name}</div>
-                        <div className="text-text-muted/40 text-[11px] font-medium">{review.date}</div>
+                        <div className="text-section-dark font-bold text-sm">{review.name}</div>
+                        <div className="text-section-dark/30 text-[11px] font-medium">{review.date}</div>
                       </div>
                     </div>
                     <div className="flex gap-0.5">
                       {Array.from({ length: 5 }).map((_, i) => (
-                        <Star key={i} size={12} className="fill-primary text-primary" />
+                        <Star key={i} size={12} className="fill-section-dark text-section-dark" />
                       ))}
                     </div>
                   </div>
-                  <p className="text-text-muted/60 text-sm leading-relaxed">{review.text}</p>
+                  <p className="text-section-dark/60 text-sm leading-relaxed">{review.text}</p>
                 </div>
               ))}
             </div>
@@ -248,60 +248,60 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
           transition={{ duration: 0.45, delay: 0.25 }}
           className="hidden lg:block sticky top-8"
         >
-          <div className="bg-white/[0.04] border border-white/[0.08] rounded-3xl p-7 space-y-6 backdrop-blur-sm">
+          <div className="bg-[#f5f5f5] border border-section-dark/10 rounded-3xl p-7 space-y-6 shadow-sm">
             <div>
-              <span className="text-text-muted/50 text-xs font-medium uppercase tracking-wider">Starting from</span>
+              <span className="text-section-dark/50 text-xs font-medium uppercase tracking-wider">Starting from</span>
               <div className="flex items-baseline gap-1 mt-1">
-                <span className="text-3xl font-extrabold text-white">${venue.priceFrom}</span>
-                <span className="text-text-muted/50 text-sm">/hour</span>
+                <span className="text-3xl font-extrabold text-section-dark">₱{venue.priceFrom}</span>
+                <span className="text-section-dark/50 text-sm">/hour</span>
               </div>
             </div>
 
             <div className="space-y-3">
-              <div className="p-4 rounded-xl bg-bg-dark border border-white/[0.06] flex items-center justify-between cursor-pointer hover:border-primary/30 transition-colors">
+              <div className="p-4 rounded-xl bg-white/60 border border-section-dark/10 flex items-center justify-between cursor-pointer hover:border-section-dark/20 transition-colors">
                 <div className="flex items-center gap-3">
-                  <CalendarDays size={18} className="text-primary/70" />
+                  <CalendarDays size={18} className="text-section-dark/40" />
                   <div>
-                    <div className="text-[10px] text-text-muted/40 font-bold uppercase tracking-wider">Date</div>
-                    <div className="text-sm font-bold text-white">Mar 20, 2026</div>
+                    <div className="text-[10px] text-section-dark/30 font-bold uppercase tracking-wider">Date</div>
+                    <div className="text-sm font-bold text-section-dark">Mar 20, 2026</div>
                   </div>
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-bg-dark border border-white/[0.06] flex items-center justify-between cursor-pointer hover:border-primary/30 transition-colors">
+              <div className="p-4 rounded-xl bg-white/60 border border-section-dark/10 flex items-center justify-between cursor-pointer hover:border-section-dark/20 transition-colors">
                 <div className="flex items-center gap-3">
-                  <Clock size={18} className="text-primary/70" />
+                  <Clock size={18} className="text-section-dark/40" />
                   <div>
-                    <div className="text-[10px] text-text-muted/40 font-bold uppercase tracking-wider">Time Slot</div>
-                    <div className="text-sm font-bold text-white">{selectedTime || "Select Time"}</div>
+                    <div className="text-[10px] text-section-dark/30 font-bold uppercase tracking-wider">Time Slot</div>
+                    <div className="text-sm font-bold text-section-dark">{selectedTime || "Select Time"}</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <button className="w-full py-4 rounded-2xl bg-primary text-text-dark font-extrabold text-base hover:brightness-110 transition-all flex items-center justify-center gap-2">
+            <button className="w-full py-4 rounded-2xl bg-section-dark text-white font-extrabold text-base hover:bg-section-dark/90 transition-all flex items-center justify-center gap-2">
               Book Now
               <ArrowRight size={18} />
             </button>
 
-            <p className="text-center text-text-muted/30 text-xs">
-              No payment required until you arrive at the venue.
+            <p className="text-center text-section-dark/30 text-xs">
+              Pay the venue owner directly via their QR code.
             </p>
           </div>
         </motion.div>
       </div>
 
       {/* Mobile Sticky Booking Bar */}
-      <div className="fixed bottom-[72px] md:bottom-0 left-0 right-0 lg:hidden z-40 bg-bg-dark/95 backdrop-blur-2xl border-t border-white/[0.06] px-4 py-3">
+      <div className="fixed bottom-[72px] md:bottom-0 left-0 right-0 lg:hidden z-40 bg-white/95 backdrop-blur-2xl border-t border-section-dark/10 px-4 py-3">
         <div className="flex items-center justify-between gap-4 max-w-7xl mx-auto">
           <div>
-            <span className="text-text-muted/50 text-xs">From</span>
+            <span className="text-section-dark/50 text-xs">From</span>
             <div className="flex items-baseline gap-1">
-              <span className="text-xl font-extrabold text-white">${venue.priceFrom}</span>
-              <span className="text-text-muted/50 text-xs">/hr</span>
+              <span className="text-xl font-extrabold text-section-dark">₱{venue.priceFrom}</span>
+              <span className="text-section-dark/50 text-xs">/hr</span>
             </div>
           </div>
-          <button className="flex-1 max-w-[240px] py-3.5 rounded-2xl bg-primary text-text-dark font-extrabold text-sm flex items-center justify-center gap-2">
+          <button className="flex-1 max-w-[240px] py-3.5 rounded-2xl bg-section-dark text-white font-extrabold text-sm flex items-center justify-center gap-2">
             Book Now
             <ArrowRight size={16} />
           </button>

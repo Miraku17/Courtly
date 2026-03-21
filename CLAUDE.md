@@ -6,7 +6,7 @@ This file provides guidance to Claude when working in this repository.
 
 ## Project Overview
 
-**CourtlyReach** — A platform for sports venue owners to list their venues, reach more players, manage bookings effortlessly, and grow their business. Free to use for venue owners.
+**CourtifyReach** — A platform for sports venue owners to list their venues, reach more players, manage bookings effortlessly, and grow their business. Free to use for venue owners.
 
 **Target users**: Sports venue owners and players looking to discover and book courts.
 

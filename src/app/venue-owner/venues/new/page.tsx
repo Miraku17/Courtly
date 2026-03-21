@@ -11,7 +11,6 @@ import {
   ChevronRight,
   Check,
   Clock,
-  DollarSign,
   Wifi,
   ParkingCircle,
   ShowerHead,
@@ -358,13 +357,12 @@ export default function NewVenuePage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-text-muted/40">
-                    Price per Hour
+                    Price per Hour (PHP)
                   </label>
                   <div className="relative group">
-                    <DollarSign
-                      size={16}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted/30 group-focus-within:text-primary transition-colors"
-                    />
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted/30 group-focus-within:text-primary transition-colors font-bold text-sm">
+                      ₱
+                    </span>
                     <input
                       type="number"
                       min="0"
@@ -573,7 +571,7 @@ export default function NewVenuePage() {
                   </div>
                   <div className="grid grid-cols-2 gap-y-3 gap-x-6">
                     <ReviewField label="Surface" value={surface || "—"} />
-                    <ReviewField label="Price/hr" value={pricePerHour ? `$${pricePerHour}` : "—"} />
+                    <ReviewField label="Price/hr" value={pricePerHour ? `₱${pricePerHour}` : "—"} />
                     <ReviewField label="Hours" value={`${openTime} – ${closeTime}`} />
                     <ReviewField
                       label="Amenities"

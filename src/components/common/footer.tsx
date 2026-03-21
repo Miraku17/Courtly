@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { TennisBallScene } from "@/components/three/tennis-ball-scene";
 
 const socials = [
@@ -20,7 +21,7 @@ const contacts = [
         <circle cx="12" cy="10" r="3" />
       </svg>
     ),
-    text: "123 Main Street, City Center",
+    text: "Mandaue, Cebu",
   },
   {
     icon: (
@@ -37,7 +38,7 @@ const contacts = [
         <polyline points="22,6 12,13 2,6" />
       </svg>
     ),
-    text: "Info@Courtly.Com",
+    text: "Info@Courtify.Com",
   },
 ];
 
@@ -61,10 +62,8 @@ export const Footer = () => {
               className="mb-5 flex items-center gap-3 text-[1.6rem] text-[#ffffff]"
 
             >
-              <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28" className="text-primary">
-                <path d="M12 2C9.5 2 8 4 8 6.5C8 9 10.5 11 12 11C13.5 11 16 9 16 6.5C16 4 14.5 2 12 2ZM12 22C14.5 22 16 20 16 17.5C16 15 13.5 13 12 13C10.5 13 8 15 8 17.5C8 20 9.5 22 12 22ZM2 12C2 14.5 4 16 6.5 16C9 16 11 13.5 11 12C11 10.5 9 8 6.5 8C4 8 2 9.5 2 12ZM22 12C22 9.5 20 8 17.5 8C15 8 13 10.5 13 12C13 13.5 15 16 17.5 16C20 16 22 14.5 22 12Z" />
-              </svg>
-              COURTLY
+              <Image src="/logo_final.png" alt="Courtify" width={64} height={64} className="size-16 rounded-full object-cover" />
+              <span className="font-panchang font-extrabold">COURTIFY</span>
             </Link>
 
             <p className="mb-8 max-w-[400px] text-[0.95rem] leading-relaxed opacity-70">
@@ -178,7 +177,7 @@ export const Footer = () => {
       <div className="bg-[#eaf6df]">
         <div className="mx-auto max-w-[1440px] px-5 py-4 text-center md:px-10">
           <p className="text-[0.9rem] text-text-dark">
-            &copy; {new Date().getFullYear()} Courtly. All Rights Reserved.
+            &copy; {new Date().getFullYear()} Courtify. All Rights Reserved.
           </p>
         </div>
       </div>

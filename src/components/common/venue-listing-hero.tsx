@@ -14,7 +14,7 @@ const rotatingTexts = [
 ];
 
 const perks = [
-  "Free to list — no hidden fees",
+  "Free for 7 days — no card required",
   "Reach thousands of players",
   "Full booking management",
 ];
@@ -116,8 +116,8 @@ export const VenueListingHero = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mb-10 max-w-[520px] text-sm leading-relaxed text-white/50 sm:text-base md:text-lg"
           >
-            Join hundreds of venue owners on Courtly. Get discovered by players,
-            fill empty time slots, and manage bookings — all completely free.
+            Join hundreds of venue owners on Courtify. Get discovered by players,
+            fill empty time slots, and manage bookings — free for 7 days.
           </motion.p>
 
           {/* CTA buttons — sharp rectangular style */}
@@ -131,7 +131,7 @@ export const VenueListingHero = () => {
               href="/signup"
               className="group flex items-center justify-center gap-2 bg-primary px-8 py-4 text-sm font-bold uppercase tracking-wider text-text-dark transition-all hover:brightness-110"
             >
-              Get Started Free
+              Start 7-Day Free Trial
               <ArrowRight
                 size={16}
                 className="transition-transform group-hover:translate-x-1"

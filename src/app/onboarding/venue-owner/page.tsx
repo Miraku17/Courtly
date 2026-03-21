@@ -1,11 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ChevronLeft, Check, MapPin, Phone, Mail } from "lucide-react";
+import { ArrowRight, ChevronLeft, Check, MapPin, Phone, Mail, LocateFixed, Loader2, Plus, Trash2, Clock, Camera, X, QrCode } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { createVenue, uploadVenueLogo, uploadVenueQRPayment } from "@/lib/api/venues";
+import { createCourt } from "@/lib/api/courts";
+import dynamic from "next/dynamic";
+
+const MapPicker = dynamic(
+  () => import("@/components/common/map-picker").then((mod) => mod.MapPicker),
+  { ssr: false }
+);
 
 type Step = 1 | 2 | 3 | 4;
+
+const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
+type DaySchedule = { enabled: boolean; open: string; close: string };
+type OperatingHours = Record<string, DaySchedule>;
+
+const DEFAULT_HOURS: OperatingHours = Object.fromEntries(
+  DAYS.map((day) => [day, { enabled: day !== "Sunday", open: "08:00", close: "22:00" }])
+);
 
 const STEP_LABELS = ["Identity", "Location", "Details", "Review"];
 const STEP_SUBTITLES = [
@@ -19,6 +39,7 @@ const VENUE_TYPES = [
   { label: "Tennis", icon: "🎾" },
   { label: "Padel", icon: "🏸" },
   { label: "Pickleball", icon: "🏓" },
+  { label: "Basketball", icon: "🏀" },
   { label: "Multisport", icon: "⚡" },
 ];
 
@@ -28,15 +49,15 @@ function StepContextPanel({ step, formData }: { step: Step; formData: { venueNam
 
   const Tip = ({ text }: { text: string }) => (
     <div className="flex items-start gap-2.5">
-      <div className="w-4 h-4 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-        <div className="w-1.5 h-1.5 rounded-full bg-primary/60" />
+      <div className="w-4 h-4 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <div className="w-1.5 h-1.5 rounded-full bg-primary" />
       </div>
-      <p className="text-[0.78rem] text-white/40 leading-snug">{text}</p>
+      <p className="text-[0.78rem] text-white/60 leading-snug">{text}</p>
     </div>
   );
 
   const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-    <p className="text-[0.72rem] font-bold uppercase tracking-widest text-white/30 mb-3">
+    <p className="text-[0.72rem] font-bold uppercase tracking-widest text-primary/70 mb-3">
       {children}
     </p>
   );
@@ -46,28 +67,28 @@ function StepContextPanel({ step, formData }: { step: Step; formData: { venueNam
       <div className="space-y-6">
         <div>
           <SectionLabel>Player preview</SectionLabel>
-          <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-4 space-y-3">
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3 shadow-xl backdrop-blur-sm">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center text-[1.1rem] flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center text-[1.1rem] flex-shrink-0">
                 {venueIcon}
               </div>
               <div className="min-w-0">
-                <p className={`font-bold text-[0.95rem] leading-tight transition-colors ${formData.venueName ? "text-white" : "text-white/25 italic"}`}>
+                <p className={`font-bold text-[0.95rem] leading-tight transition-colors ${formData.venueName ? "text-white" : "text-white/40 italic"}`}>
                   {displayName}
                 </p>
-                <p className="text-[0.75rem] text-white/40 mt-0.5">{formData.venueType} · Open now</p>
+                <p className="text-[0.75rem] text-white/50 mt-0.5">{formData.venueType} · Open now</p>
               </div>
             </div>
             <div className="flex items-center gap-1.5 pl-1">
               {[1, 2, 3, 4, 5].map((i) => (
-                <svg key={i} width="10" height="10" viewBox="0 0 24 24" fill={i <= 4 ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" className="text-primary/70">
+                <svg key={i} width="10" height="10" viewBox="0 0 24 24" fill={i <= 4 ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" className="text-primary">
                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                 </svg>
               ))}
-              <span className="text-[0.68rem] text-white/30 ml-0.5">4.8 · 124 reviews</span>
+              <span className="text-[0.68rem] text-white/40 ml-0.5">4.8 · 124 reviews</span>
             </div>
           </div>
-          <p className="text-[0.72rem] text-white/25 mt-2 ml-1">
+          <p className="text-[0.72rem] text-white/40 mt-2 ml-1">
             This is how your venue appears in search results.
           </p>
         </div>
@@ -84,18 +105,9 @@ function StepContextPanel({ step, formData }: { step: Step; formData: { venueNam
   if (step === 2) {
     return (
       <div className="space-y-2">
-        {/* Stat callout
-        <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-5">
-          <p className="text-[2rem] font-bold text-primary leading-none">73%</p>
-          <p className="text-[0.78rem] text-white/40 mt-1.5 leading-snug">
-            of bookings come from players within 5 km of the venue.
-          </p>
-        </div> */}
-
-        {/* Mock nearby venues list */}
         <div>
           <SectionLabel>How you appear to nearby players</SectionLabel>
-          <div className="bg-white/[0.04] border border-white/10 rounded-2xl overflow-hidden divide-y divide-white/5">
+          <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden divide-y divide-white/5 shadow-xl backdrop-blur-sm">
             {[
               { name: "City Sports Center", dist: "1.2 km", faded: true },
               { name: displayName, dist: "—", highlight: true, icon: venueIcon },
@@ -103,26 +115,26 @@ function StepContextPanel({ step, formData }: { step: Step; formData: { venueNam
             ].map((row) => (
               <div
                 key={row.name}
-                className={`flex items-center gap-3 px-4 py-3 transition-colors ${row.highlight ? "bg-primary/[0.08]" : ""}`}
+                className={`flex items-center gap-3 px-4 py-3 transition-colors ${row.highlight ? "bg-primary/10" : ""}`}
               >
                 <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[0.85rem] flex-shrink-0 ${row.highlight ? "bg-primary/20 border border-primary/30" : "bg-white/5"}`}>
                   {row.icon ?? "🏟️"}
                 </div>
-                <p className={`flex-1 text-[0.8rem] font-bold truncate ${row.highlight ? "text-white" : "text-white/30"}`}>
+                <p className={`flex-1 text-[0.8rem] font-bold truncate ${row.highlight ? "text-white" : "text-white/40"}`}>
                   {row.name}
                 </p>
-                <p className={`text-[0.72rem] flex-shrink-0 ${row.highlight ? "text-primary font-bold" : "text-white/20"}`}>
+                <p className={`text-[0.72rem] flex-shrink-0 ${row.highlight ? "text-primary font-bold" : "text-white/40"}`}>
                   {row.dist}
                 </p>
               </div>
             ))}
           </div>
-          <p className="text-[0.72rem] text-white/25 mt-2 ml-1">
+          <p className="text-[0.72rem] text-white/40 mt-2 ml-1">
             Accurate address improves your placement.
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 pt-4">
           <SectionLabel>Tips</SectionLabel>
           <Tip text="Include unit or floor number if applicable" />
           <Tip text="Double-check the city — it affects search filters" />
@@ -135,39 +147,37 @@ function StepContextPanel({ step, formData }: { step: Step; formData: { venueNam
   if (step === 3) {
     return (
       <div className="space-y-6">
-        {/* Pricing benchmark */}
         <div>
           <SectionLabel>Market rates near you</SectionLabel>
-          <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-4 space-y-3">
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3 shadow-xl backdrop-blur-sm">
             {[
-              { label: "Budget", range: "$20–35/hr", width: "45%" },
-              { label: "Mid-range", range: "$36–60/hr", width: "70%", highlight: true },
-              { label: "Premium", range: "$61–100/hr", width: "30%" },
+              { label: "Budget", range: "₱300–500/hr", width: "45%" },
+              { label: "Mid-range", range: "₱500–800/hr", width: "70%", highlight: true },
+              { label: "Premium", range: "₱800–1,500/hr", width: "30%" },
             ].map((tier) => (
               <div key={tier.label} className="space-y-1">
                 <div className="flex justify-between items-center">
-                  <span className={`text-[0.72rem] font-bold ${tier.highlight ? "text-primary" : "text-white/35"}`}>
+                  <span className={`text-[0.72rem] font-bold ${tier.highlight ? "text-primary" : "text-white/40"}`}>
                     {tier.label}
                   </span>
-                  <span className={`text-[0.72rem] ${tier.highlight ? "text-white/70" : "text-white/25"}`}>
+                  <span className={`text-[0.72rem] ${tier.highlight ? "text-white/70" : "text-white/40"}`}>
                     {tier.range}
                   </span>
                 </div>
                 <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full ${tier.highlight ? "bg-primary/60" : "bg-white/10"}`}
+                    className={`h-full rounded-full ${tier.highlight ? "bg-primary" : "bg-white/10"}`}
                     style={{ width: tier.width }}
                   />
                 </div>
               </div>
             ))}
           </div>
-          <p className="text-[0.72rem] text-white/25 mt-2 ml-1">
+          <p className="text-[0.72rem] text-white/40 mt-2 ml-1">
             Most booked venues fall in the mid-range tier.
           </p>
         </div>
 
-        {/* What players look for */}
         <div className="space-y-4">
           <SectionLabel>What players look for</SectionLabel>
           {[
@@ -177,7 +187,7 @@ function StepContextPanel({ step, formData }: { step: Step; formData: { venueNam
           ].map((item) => (
             <div key={item.text} className="flex items-start gap-2.5">
               <span className="text-[0.9rem] flex-shrink-0 mt-0.5">{item.icon}</span>
-              <p className="text-[0.78rem] text-white/40 leading-snug">{item.text}</p>
+              <p className="text-[0.78rem] text-white/60 leading-snug">{item.text}</p>
             </div>
           ))}
         </div>
@@ -188,7 +198,6 @@ function StepContextPanel({ step, formData }: { step: Step; formData: { venueNam
   if (step === 4) {
     return (
       <div className="space-y-6">
-        {/* What happens next */}
         <div>
           <SectionLabel>After you launch</SectionLabel>
           <div className="space-y-3">
@@ -199,28 +208,27 @@ function StepContextPanel({ step, formData }: { step: Step; formData: { venueNam
             ].map((item, i) => (
               <div key={item.title} className="flex gap-3">
                 <div className="flex flex-col items-center gap-1 flex-shrink-0">
-                  <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-[0.9rem]">
+                  <div className="w-8 h-8 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center text-[0.9rem]">
                     {item.icon}
                   </div>
-                  {i < 2 && <div className="w-px flex-1 bg-white/5" />}
+                  {i < 2 && <div className="w-px flex-1 bg-white/10" />}
                 </div>
                 <div className="pb-3">
-                  <p className="text-[0.82rem] font-bold text-white/80">{item.title}</p>
-                  <p className="text-[0.75rem] text-white/35 mt-0.5 leading-snug">{item.desc}</p>
+                  <p className="text-[0.82rem] font-bold text-white/90">{item.title}</p>
+                  <p className="text-[0.75rem] text-white/40 mt-0.5 leading-snug">{item.desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Trust badge */}
-        <div className="bg-primary/[0.06] border border-primary/15 rounded-2xl p-4 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-primary/15 border border-primary/25 flex items-center justify-center flex-shrink-0">
+        <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center flex-shrink-0">
             <Check size={16} className="text-primary" strokeWidth={3} />
           </div>
           <div>
-            <p className="text-[0.82rem] font-bold text-white/80">Free forever for venue owners</p>
-            <p className="text-[0.72rem] text-white/35 mt-0.5">No listing fees. No hidden charges.</p>
+            <p className="text-[0.82rem] font-bold text-white/90">Free forever for venue owners</p>
+            <p className="text-[0.72rem] text-white/40 mt-0.5">No listing fees. No hidden charges.</p>
           </div>
         </div>
       </div>
@@ -240,10 +248,95 @@ export default function VenueOwnerOnboarding() {
     phone: "",
     email: "",
     description: "",
-    pricing: "",
-    courtsCount: "1",
+    courts: [{ name: "Court 1", pricePerHour: "" }] as { name: string; pricePerHour: string }[],
+    operatingHours: DEFAULT_HOURS as OperatingHours,
     tags: [] as string[],
+    lat: 10.3157,
+    lng: 123.8854,
   });
+  const [locatingUser, setLocatingUser] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  const handleLogoSelect = (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5MB.");
+      return;
+    }
+    setLogoFile(file);
+    const reader = new FileReader();
+    reader.onload = (e) => setLogoPreview(e.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const removeLogo = () => {
+    setLogoFile(null);
+    setLogoPreview(null);
+    if (logoInputRef.current) logoInputRef.current.value = "";
+  };
+
+  const [qrFiles, setQrFiles] = useState<File[]>([]);
+  const [qrPreviews, setQrPreviews] = useState<string[]>([]);
+  const qrInputRef = useRef<HTMLInputElement>(null);
+
+  const handleQrSelect = (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5MB.");
+      return;
+    }
+    if (qrFiles.length >= 5) {
+      toast.error("Maximum 5 QR codes allowed.");
+      return;
+    }
+    setQrFiles((prev) => [...prev, file]);
+    setErrors((prev) => { const next = { ...prev }; delete next.qrPayment; return next; });
+    const reader = new FileReader();
+    reader.onload = (e) => setQrPreviews((prev) => [...prev, e.target?.result as string]);
+    reader.readAsDataURL(file);
+  };
+
+  const removeQr = (index: number) => {
+    setQrFiles((prev) => prev.filter((_, i) => i !== index));
+    setQrPreviews((prev) => prev.filter((_, i) => i !== index));
+    if (qrInputRef.current) qrInputRef.current.value = "";
+  };
+
+  const validateStep = (s: Step): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (s === 1) {
+      if (!formData.venueName.trim()) newErrors.venueName = "Venue name is required";
+    }
+
+    if (s === 2) {
+      if (!formData.address.trim()) newErrors.address = "Street address is required";
+      if (!formData.city.trim()) newErrors.city = "City is required";
+      if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
+      if (!formData.email.trim()) newErrors.email = "Email is required";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Enter a valid email";
+    }
+
+    if (s === 3) {
+      formData.courts.forEach((court, i) => {
+        if (!court.name.trim()) newErrors[`court_name_${i}`] = "Court name is required";
+        if (!court.pricePerHour || parseFloat(court.pricePerHour) <= 0) newErrors[`court_price_${i}`] = "Price is required";
+      });
+      if (qrFiles.length === 0) newErrors.qrPayment = "At least one payment QR code is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const [tagInput, setTagInput] = useState("");
 
@@ -259,46 +352,117 @@ export default function VenueOwnerOnboarding() {
     updateFormData({ tags: formData.tags.filter((t) => t !== tag) });
   };
 
-  const nextStep = () => setStep((prev) => (prev < 4 ? ((prev + 1) as Step) : prev));
-  const prevStep = () => setStep((prev) => (prev > 1 ? ((prev - 1) as Step) : prev));
+  const addCourt = () => {
+    if (formData.courts.length >= 15) return;
+    const nextNum = formData.courts.length + 1;
+    updateFormData({ courts: [...formData.courts, { name: `Court ${nextNum}`, pricePerHour: "" }] });
+  };
 
+  const removeCourt = (index: number) => {
+    if (formData.courts.length <= 1) return;
+    updateFormData({ courts: formData.courts.filter((_, i) => i !== index) });
+  };
+
+  const updateCourt = (index: number, data: Partial<{ name: string; pricePerHour: string }>) => {
+    const updated = formData.courts.map((c, i) => (i === index ? { ...c, ...data } : c));
+    updateFormData({ courts: updated });
+  };
+
+  const updateDaySchedule = (day: string, data: Partial<DaySchedule>) => {
+    updateFormData({
+      operatingHours: {
+        ...formData.operatingHours,
+        [day]: { ...formData.operatingHours[day], ...data },
+      },
+    });
+  };
+
+  const router = useRouter();
+
+  const nextStep = () => {
+    if (!validateStep(step)) return;
+    setStep((prev) => (prev < 4 ? ((prev + 1) as Step) : prev));
+  };
+  const prevStep = () => {
+    setErrors({});
+    setStep((prev) => (prev > 1 ? ((prev - 1) as Step) : prev));
+  };
 
   const updateFormData = (data: Partial<typeof formData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
+    const keys = Object.keys(data);
+    if (keys.length > 0) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        keys.forEach((k) => delete next[k]);
+        return next;
+      });
+    }
   };
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const venue = await createVenue({
+        name: formData.venueName,
+        type: formData.venueType,
+        address: formData.address,
+        city: formData.city,
+        phone: formData.phone,
+        email: formData.email,
+        description: formData.description || undefined,
+        lat: formData.lat,
+        lng: formData.lng,
+        operatingHours: formData.operatingHours,
+        tags: formData.tags.length > 0 ? formData.tags : undefined,
+      });
+
+      for (const court of formData.courts) {
+        await createCourt({
+          name: court.name,
+          sportType: formData.venueType,
+          pricePerHour: parseFloat(court.pricePerHour) || 0,
+        });
+      }
+
+      if (logoFile) {
+        await uploadVenueLogo(logoFile);
+      }
+
+      for (const qr of qrFiles) {
+        await uploadVenueQRPayment(qr);
+      }
+
+      return venue;
+    },
+    onSuccess: () => {
+      toast.success("Venue created successfully!");
+      setTimeout(() => router.push("/venue-owner"), 1000);
+    },
+    onError: (error: any) => {
+      const message =
+        error?.response?.data?.error || error?.response?.data?.message || "Something went wrong. Please try again.";
+      toast.error(message);
+    },
+  });
 
   const progress = (step / 4) * 100;
 
   return (
-    <div className="min-h-svh bg-[#0a1a0a] text-white flex flex-col font-mona overflow-x-hidden">
+    <div className="h-svh text-white flex flex-col font-clash overflow-hidden" style={{ backgroundColor: "#102b0f" }}>
       {/* ── Mobile Header ── */}
-      <header className="md:hidden px-6 py-5 flex items-center justify-between border-b border-white/5">
+      <header className="md:hidden px-6 py-5 flex items-center justify-between border-b border-white/10">
         <Link
           href="/"
           className="flex items-center gap-2 text-[1.2rem] uppercase font-bold tracking-tighter"
         >
-          <div className="bg-primary p-1 rounded-md">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="3"
-              width="16"
-              height="16"
-              className="text-bg-dark"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 2v20" />
-              <path d="M2 12h20" />
-            </svg>
-          </div>
-          COURTLY
+          <Image src="/logo_final.png" alt="Courtify" width={40} height={40} className="size-10 rounded-full object-cover" />
+          <span className="font-panchang text-white">COURTIFY</span>
         </Link>
         <div className="flex items-center gap-3">
-          <span className="text-[0.8rem] font-bold text-white/30 uppercase tracking-wider">
+          <span className="text-[0.8rem] font-bold text-white/40 uppercase tracking-wider">
             Step {step} / 4
           </span>
-          <button className="text-[0.8rem] font-bold text-white/30 hover:text-white transition-colors">
+          <button className="text-[0.8rem] font-bold text-white/60 hover:text-white transition-colors">
             Save
           </button>
         </div>
@@ -316,29 +480,18 @@ export default function VenueOwnerOnboarding() {
       {/* ── Two-Column Layout ── */}
       <div className="flex-1 flex min-h-0">
         {/* Left Context Panel */}
-        <aside className="hidden md:flex flex-col w-[380px] xl:w-[440px] flex-shrink-0 border-r border-white/5 bg-white/[0.012]">
+        <aside 
+          className="hidden md:flex flex-col w-[380px] xl:w-[440px] flex-shrink-0 border-r border-white/10"
+          style={{ backgroundColor: "#102b0f" }}
+        >
           {/* Logo */}
-          <div className="px-10 py-8 border-b border-white/5">
+          <div className="px-10 py-8 border-b border-white/10">
             <Link
               href="/"
-              className="flex items-center gap-2 text-[1.4rem] uppercase font-bold tracking-tighter"
+              className="flex items-center gap-3 text-[1.4rem] uppercase font-bold tracking-tighter"
             >
-              <div className="bg-primary p-1 rounded-md">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  width="18"
-                  height="18"
-                  className="text-bg-dark"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 2v20" />
-                  <path d="M2 12h20" />
-                </svg>
-              </div>
-              COURTLY
+              <Image src="/logo_final.png" alt="Courtify" width={48} height={48} className="size-12 rounded-full object-cover" />
+              <span className="font-panchang text-white">COURTIFY</span>
             </Link>
           </div>
 
@@ -356,8 +509,8 @@ export default function VenueOwnerOnboarding() {
                         isCompleted
                           ? "bg-primary text-bg-dark"
                           : isActive
-                          ? "bg-primary/15 border border-primary text-primary"
-                          : "bg-white/5 border border-white/10 text-white/25"
+                          ? "bg-primary/20 border border-primary text-primary"
+                          : "bg-white/5 border border-white/10 text-white/30"
                       }`}
                     >
                       {isCompleted ? <Check size={14} strokeWidth={3} /> : s}
@@ -367,14 +520,14 @@ export default function VenueOwnerOnboarding() {
                   <div className="pt-1 pb-4">
                     <p
                       className={`text-[0.8rem] font-bold uppercase tracking-wider transition-colors ${
-                        isActive ? "text-white" : isCompleted ? "text-white/70" : "text-white/25"
+                        isActive ? "text-white" : isCompleted ? "text-white/60" : "text-white/30"
                       }`}
                     >
                       {label}
                     </p>
                     <p
                       className={`text-[0.72rem] mt-0.5 transition-colors ${
-                        isActive ? "text-white/50" : "text-white/20"
+                        isActive ? "text-white/50" : "text-white/30"
                       }`}
                     >
                       {STEP_SUBTITLES[i]}
@@ -403,13 +556,14 @@ export default function VenueOwnerOnboarding() {
         </aside>
 
         {/* ── Right Form Panel ── */}
-        <main className="flex-1 flex flex-col min-w-0">
-          <div className="hidden md:flex px-12 py-5 justify-end border-b border-white/5">
-            <button className="text-[0.82rem] font-bold text-white/35 hover:text-white transition-colors">
+        <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#0c220c]">
+          <div className="hidden md:flex px-12 py-5 justify-end border-b border-white/10 shrink-0">
+            <button className="text-[0.82rem] font-bold text-white/40 hover:text-white transition-colors">
               Save and Exit
             </button>
           </div>
-          <div className="flex-1 flex items-center justify-center px-6 md:px-14 py-10 md:py-16">
+          <div className="flex-1 overflow-y-auto px-6 md:px-14 py-10 md:py-16">
+            <div className="flex items-start justify-center min-h-full">
             <div className="w-full max-w-[540px]">
               <AnimatePresence mode="wait">
                 <motion.div
@@ -423,11 +577,11 @@ export default function VenueOwnerOnboarding() {
                   {step === 1 && (
                     <div className="space-y-8">
                       <div>
-                        <h1 className="text-[2rem] md:text-[2.8rem] font-bold leading-[1.1] mb-3">
+                        <h1 className="text-[2rem] md:text-[2.8rem] font-bold leading-[1.1] mb-3 text-white">
                           Let&apos;s start with{" "}
                           <span className="text-primary italic">your venue identity.</span>
                         </h1>
-                        <p className="text-[1rem] text-white/50 max-w-[440px]">
+                        <p className="text-[1rem] text-white/60 max-w-[440px]">
                           Your venue name will be visible to all players. Make it professional
                           and recognizable.
                         </p>
@@ -435,20 +589,21 @@ export default function VenueOwnerOnboarding() {
 
                       <div className="space-y-5 pt-2">
                         <div className="space-y-2">
-                          <label className="text-[0.72rem] font-bold uppercase tracking-widest text-white/35 ml-1">
-                            Venue Name
+                          <label className="text-[0.72rem] font-bold uppercase tracking-widest text-primary/70 ml-1">
+                            Venue Name <span className="text-primary/50">*</span>
                           </label>
                           <input
                             type="text"
                             value={formData.venueName}
                             onChange={(e) => updateFormData({ venueName: e.target.value })}
                             placeholder="e.g. Royal Tennis Club"
-                            className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-[1.05rem] outline-none focus:border-primary/50 focus:bg-white/[0.05] focus:shadow-[0_0_0_3px_rgba(var(--color-primary-rgb,100,220,100),0.07)] transition-all"
+                            className={`w-full bg-white/5 border rounded-xl px-5 py-4 text-[1.05rem] text-white outline-none focus:border-primary/50 focus:bg-white/10 transition-all ${errors.venueName ? "border-red-400/60" : "border-white/10"}`}
                           />
+                          {errors.venueName && <p className="text-red-400 text-[0.72rem] ml-1">{errors.venueName}</p>}
                         </div>
 
                         <div className="space-y-3">
-                          <label className="text-[0.72rem] font-bold uppercase tracking-widest text-white/35 ml-1">
+                          <label className="text-[0.72rem] font-bold uppercase tracking-widest text-primary/70 ml-1">
                             Venue Type
                           </label>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -458,8 +613,8 @@ export default function VenueOwnerOnboarding() {
                                 onClick={() => updateFormData({ venueType: label })}
                                 className={`py-3.5 rounded-xl border font-bold text-[0.9rem] transition-all flex flex-col items-center gap-1.5 ${
                                   formData.venueType === label
-                                    ? "bg-primary text-bg-dark border-primary shadow-lg shadow-primary/15"
-                                    : "bg-white/[0.03] border-white/10 text-white/55 hover:border-white/20 hover:bg-white/[0.05]"
+                                    ? "bg-primary text-bg-dark border-primary shadow-lg shadow-primary/20"
+                                    : "bg-white/5 border-white/10 text-white/60 hover:border-white/20 hover:bg-white/10"
                                 }`}
                               >
                                 <span className="text-[1.2rem] leading-none">{icon}</span>
@@ -467,6 +622,57 @@ export default function VenueOwnerOnboarding() {
                               </button>
                             ))}
                           </div>
+                        </div>
+
+                        {/* Venue Logo */}
+                        <div className="space-y-2">
+                          <label className="text-[0.72rem] font-bold uppercase tracking-widest text-primary/70 ml-1">
+                            Venue Logo
+                          </label>
+                          <input
+                            ref={logoInputRef}
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleLogoSelect(file);
+                            }}
+                          />
+                          {logoPreview ? (
+                            <div className="relative w-32 h-32 group">
+                              <Image
+                                src={logoPreview}
+                                alt="Venue logo preview"
+                                fill
+                                className="rounded-2xl object-cover border border-white/10"
+                              />
+                              <button
+                                type="button"
+                                onClick={removeLogo}
+                                className="absolute -top-2 -right-2 size-6 rounded-full bg-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                              >
+                                <X size={14} className="text-white" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => logoInputRef.current?.click()}
+                                className="absolute inset-0 rounded-2xl bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <Camera size={20} className="text-white" />
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => logoInputRef.current?.click()}
+                              className="flex flex-col items-center justify-center gap-2 w-32 h-32 rounded-2xl border border-dashed border-white/20 bg-white/5 hover:border-primary/30 hover:bg-white/10 transition-all"
+                            >
+                              <Camera size={24} className="text-white/30" />
+                              <span className="text-[0.7rem] font-bold text-white/30">Upload</span>
+                            </button>
+                          )}
+                          <p className="text-[0.7rem] text-white/40 ml-1">JPG, PNG, or WebP. Max 5MB.</p>
                         </div>
                       </div>
                     </div>
@@ -476,23 +682,23 @@ export default function VenueOwnerOnboarding() {
                   {step === 2 && (
                     <div className="space-y-8">
                       <div>
-                        <h1 className="text-[2rem] md:text-[2.8rem] font-bold leading-[1.1] mb-3">
+                        <h1 className="text-[2rem] md:text-[2.8rem] font-bold leading-[1.1] mb-3 text-white">
                           Where is your{" "}
                           <span className="text-primary italic">venue located?</span>
                         </h1>
-                        <p className="text-[1rem] text-white/50 max-w-[440px]">
+                        <p className="text-[1rem] text-white/60 max-w-[440px]">
                           Providing an accurate address helps players find your courts easily.
                         </p>
                       </div>
 
                       <div className="space-y-5 pt-2">
                         <div className="space-y-2">
-                          <label className="text-[0.72rem] font-bold uppercase tracking-widest text-white/35 ml-1">
-                            Street Address
+                          <label className="text-[0.72rem] font-bold uppercase tracking-widest text-primary/70 ml-1">
+                            Street Address <span className="text-primary/50">*</span>
                           </label>
                           <div className="relative">
                             <MapPin
-                              className="absolute left-5 top-1/2 -translate-y-1/2 text-white/25"
+                              className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30"
                               size={18}
                             />
                             <input
@@ -500,51 +706,54 @@ export default function VenueOwnerOnboarding() {
                               value={formData.address}
                               onChange={(e) => updateFormData({ address: e.target.value })}
                               placeholder="Street name and number"
-                              className="w-full bg-white/[0.03] border border-white/10 rounded-xl pl-12 pr-5 py-4 text-[1.05rem] outline-none focus:border-primary/50 focus:bg-white/[0.05] transition-all"
+                              className={`w-full bg-white/5 border rounded-xl pl-12 pr-5 py-4 text-[1.05rem] text-white outline-none focus:border-primary/50 focus:bg-white/10 transition-all ${errors.address ? "border-red-400/60" : "border-white/10"}`}
                             />
                           </div>
+                          {errors.address && <p className="text-red-400 text-[0.72rem] ml-1">{errors.address}</p>}
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                           <div className="space-y-2">
-                            <label className="text-[0.72rem] font-bold uppercase tracking-widest text-white/35 ml-1">
-                              City
+                            <label className="text-[0.72rem] font-bold uppercase tracking-widest text-primary/70 ml-1">
+                              City <span className="text-primary/50">*</span>
                             </label>
                             <input
                               type="text"
                               value={formData.city}
                               onChange={(e) => updateFormData({ city: e.target.value })}
                               placeholder="City name"
-                              className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-[1.05rem] outline-none focus:border-primary/50 focus:bg-white/[0.05] transition-all"
+                              className={`w-full bg-white/5 border rounded-xl px-5 py-4 text-[1.05rem] text-white outline-none focus:border-primary/50 focus:bg-white/10 transition-all ${errors.city ? "border-red-400/60" : "border-white/10"}`}
                             />
+                            {errors.city && <p className="text-red-400 text-[0.72rem] ml-1">{errors.city}</p>}
                           </div>
                           <div className="space-y-2">
-                            <label className="text-[0.72rem] font-bold uppercase tracking-widest text-white/35 ml-1">
-                              Contact Phone
+                            <label className="text-[0.72rem] font-bold uppercase tracking-widest text-primary/70 ml-1">
+                              Contact Phone <span className="text-primary/50">*</span>
                             </label>
                             <div className="relative">
                               <Phone
-                                className="absolute left-5 top-1/2 -translate-y-1/2 text-white/25"
+                                className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30"
                                 size={16}
                               />
                               <input
                                 type="tel"
                                 value={formData.phone}
                                 onChange={(e) => updateFormData({ phone: e.target.value })}
-                                placeholder="+1 (555) 000-0000"
-                                className="w-full bg-white/[0.03] border border-white/10 rounded-xl pl-12 pr-5 py-4 text-[1.05rem] outline-none focus:border-primary/50 focus:bg-white/[0.05] transition-all"
+                                placeholder="+63 (912) 345-6789"
+                                className={`w-full bg-white/5 border rounded-xl pl-12 pr-5 py-4 text-[1.05rem] text-white outline-none focus:border-primary/50 focus:bg-white/10 transition-all ${errors.phone ? "border-red-400/60" : "border-white/10"}`}
                               />
                             </div>
+                            {errors.phone && <p className="text-red-400 text-[0.72rem] ml-1">{errors.phone}</p>}
                           </div>
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-[0.72rem] font-bold uppercase tracking-widest text-white/35 ml-1">
-                            Contact Email
+                          <label className="text-[0.72rem] font-bold uppercase tracking-widest text-primary/70 ml-1">
+                            Contact Email <span className="text-primary/50">*</span>
                           </label>
                           <div className="relative">
                             <Mail
-                              className="absolute left-5 top-1/2 -translate-y-1/2 text-white/25"
+                              className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30"
                               size={16}
                             />
                             <input
@@ -552,9 +761,47 @@ export default function VenueOwnerOnboarding() {
                               value={formData.email}
                               onChange={(e) => updateFormData({ email: e.target.value })}
                               placeholder="venue@example.com"
-                              className="w-full bg-white/[0.03] border border-white/10 rounded-xl pl-12 pr-5 py-4 text-[1.05rem] outline-none focus:border-primary/50 focus:bg-white/[0.05] transition-all"
+                              className={`w-full bg-white/5 border rounded-xl pl-12 pr-5 py-4 text-[1.05rem] text-white outline-none focus:border-primary/50 focus:bg-white/10 transition-all ${errors.email ? "border-red-400/60" : "border-white/10"}`}
                             />
                           </div>
+                          {errors.email && <p className="text-red-400 text-[0.72rem] ml-1">{errors.email}</p>}
+                        </div>
+
+                        <div className="space-y-2 pt-2">
+                          <div className="flex items-center justify-between">
+                            <label className="text-[0.72rem] font-bold uppercase tracking-widest text-primary/70 ml-1">
+                              Pin Your Location
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setLocatingUser(true);
+                                navigator.geolocation.getCurrentPosition(
+                                  (pos) => {
+                                    updateFormData({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+                                    setLocatingUser(false);
+                                  },
+                                  () => setLocatingUser(false),
+                                  { enableHighAccuracy: true }
+                                );
+                              }}
+                              disabled={locatingUser}
+                              className="flex items-center gap-1.5 text-[0.72rem] font-bold text-primary hover:text-primary-hover transition-colors disabled:opacity-50"
+                            >
+                              <LocateFixed size={14} className={locatingUser ? "animate-spin" : ""} />
+                              {locatingUser ? "Locating..." : "Use my location"}
+                            </button>
+                          </div>
+                          <div className="h-[280px] sm:h-[320px] rounded-xl overflow-hidden border border-white/10 bg-white/5">
+                            <MapPicker
+                              lat={formData.lat}
+                              lng={formData.lng}
+                              onLocationChange={(lat, lng) => updateFormData({ lat, lng })}
+                            />
+                          </div>
+                          <p className="text-[0.72rem] text-white/40 ml-1">
+                            Click on the map to pin your venue&apos;s exact location.
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -564,59 +811,152 @@ export default function VenueOwnerOnboarding() {
                   {step === 3 && (
                     <div className="space-y-8">
                       <div>
-                        <h1 className="text-[2rem] md:text-[2.8rem] font-bold leading-[1.1] mb-3">
+                        <h1 className="text-[2rem] md:text-[2.8rem] font-bold leading-[1.1] mb-3 text-white">
                           Share some{" "}
                           <span className="text-primary italic">key details.</span>
                         </h1>
-                        <p className="text-[1rem] text-white/50 max-w-[440px]">
+                        <p className="text-[1rem] text-white/60 max-w-[440px]">
                           Help players understand what makes your venue unique and how much it
                           costs to play.
                         </p>
                       </div>
 
                       <div className="space-y-5 pt-2">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                          <div className="space-y-2">
-                            <label className="text-[0.72rem] font-bold uppercase tracking-widest text-white/35 ml-1">
-                              Number of Courts
+                        {/* Courts List */}
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between ml-1 mr-1">
+                            <label className="text-[0.72rem] font-bold uppercase tracking-widest text-primary/70">
+                              Courts ({formData.courts.length} / 15) <span className="text-primary/50">*</span>
                             </label>
-                            <select
-                              value={formData.courtsCount}
-                              onChange={(e) => updateFormData({ courtsCount: e.target.value })}
-                              className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-[1.05rem] outline-none focus:border-primary/50 focus:bg-white/[0.05] transition-all appearance-none cursor-pointer"
-                            >
-                              {[1, 2, 3, 4, 5, 10, 15, 20].map((n) => (
-                                <option key={n} value={n} className="bg-[#0a1a0a]">
-                                  {n} {n === 1 ? "Court" : "Courts"}
-                                </option>
-                              ))}
-                            </select>
                           </div>
+                          <div className="space-y-3">
+                            {formData.courts.map((court, index) => (
+                              <div key={index}>
+                                <div
+                                  className={`flex items-center gap-3 bg-white/5 border rounded-xl p-3 transition-all hover:border-white/20 ${errors[`court_name_${index}`] || errors[`court_price_${index}`] ? "border-red-400/60" : "border-white/10"}`}
+                                >
+                                  <input
+                                    type="text"
+                                    value={court.name}
+                                    onChange={(e) => {
+                                      updateCourt(index, { name: e.target.value });
+                                      setErrors((prev) => { const next = { ...prev }; delete next[`court_name_${index}`]; return next; });
+                                    }}
+                                    placeholder="Court name"
+                                    className="flex-1 bg-transparent text-[0.95rem] text-white outline-none placeholder:text-white/20"
+                                  />
+                                  <div className="relative flex-shrink-0 w-[120px]">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 font-bold text-[0.85rem]">
+                                      ₱
+                                    </span>
+                                    <input
+                                      type="number"
+                                      value={court.pricePerHour}
+                                      onChange={(e) => {
+                                        updateCourt(index, { pricePerHour: e.target.value });
+                                        setErrors((prev) => { const next = { ...prev }; delete next[`court_price_${index}`]; return next; });
+                                      }}
+                                      placeholder="0"
+                                      min="1"
+                                      className={`w-full bg-white/5 border rounded-lg pl-7 pr-3 py-2 text-[0.9rem] text-white outline-none focus:border-primary/50 transition-all ${errors[`court_price_${index}`] ? "border-red-400/60" : "border-white/10"}`}
+                                    />
+                                  </div>
+                                  <span className="text-[0.75rem] text-white/40 flex-shrink-0">/hr</span>
+                                  {formData.courts.length > 1 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => removeCourt(index)}
+                                      className="flex-shrink-0 p-1.5 text-white/30 hover:text-red-400 transition-colors"
+                                    >
+                                      <Trash2 size={15} />
+                                    </button>
+                                  )}
+                                </div>
+                                {(errors[`court_name_${index}`] || errors[`court_price_${index}`]) && (
+                                  <p className="text-red-400 text-[0.72rem] ml-1 mt-1">
+                                    {errors[`court_name_${index}`] || errors[`court_price_${index}`]}
+                                  </p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                          {formData.courts.length < 15 && (
+                            <button
+                              type="button"
+                              onClick={addCourt}
+                              className="flex items-center gap-2 w-full justify-center py-3 rounded-xl border border-dashed border-white/10 text-[0.85rem] font-bold text-white/40 hover:border-primary/30 hover:text-primary/60 transition-all bg-white/5"
+                            >
+                              <Plus size={16} />
+                              Add Court
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Operating Hours */}
+                        <div className="space-y-2">
+                          <label className="text-[0.72rem] font-bold uppercase tracking-widest text-primary/70 ml-1 flex items-center gap-2">
+                            <Clock size={13} className="text-primary/70" />
+                            Operating Hours
+                          </label>
                           <div className="space-y-2">
-                            <label className="text-[0.72rem] font-bold uppercase tracking-widest text-white/35 ml-1">
-                              Hourly Rate (USD)
-                            </label>
-                            <div className="relative">
-                              <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30 font-bold text-[1rem]">
-                                $
-                              </span>
-                              <input
-                                type="number"
-                                value={formData.pricing}
-                                onChange={(e) => updateFormData({ pricing: e.target.value })}
-                                placeholder="45"
-                                className="w-full bg-white/[0.03] border border-white/10 rounded-xl pl-9 pr-5 py-4 text-[1.05rem] outline-none focus:border-primary/50 focus:bg-white/[0.05] transition-all"
-                              />
-                            </div>
+                            {DAYS.map((day) => {
+                              const schedule = formData.operatingHours[day];
+                              return (
+                                <div
+                                  key={day}
+                                  className={`flex items-center gap-3 rounded-xl border p-3 transition-all ${
+                                    schedule.enabled
+                                      ? "bg-white/5 border-white/10"
+                                      : "bg-white/[0.02] border-white/5 opacity-40"
+                                  }`}
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={() => updateDaySchedule(day, { enabled: !schedule.enabled })}
+                                    className={`flex-shrink-0 w-10 h-6 rounded-full transition-all relative ${
+                                      schedule.enabled ? "bg-primary" : "bg-white/10"
+                                    }`}
+                                  >
+                                    <div
+                                      className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
+                                        schedule.enabled ? "left-5" : "left-1"
+                                      }`}
+                                    />
+                                  </button>
+                                  <span className="text-[0.85rem] font-bold w-[72px] flex-shrink-0 text-white/80">
+                                    {day.slice(0, 3)}
+                                  </span>
+                                  {schedule.enabled ? (
+                                    <div className="flex items-center gap-2 flex-1">
+                                      <input
+                                        type="time"
+                                        value={schedule.open}
+                                        onChange={(e) => updateDaySchedule(day, { open: e.target.value })}
+                                        className="bg-white/10 border border-white/15 rounded-lg px-3 py-2 text-[0.85rem] text-white outline-none focus:border-primary/50 transition-all w-[120px] [color-scheme:dark]"
+                                      />
+                                      <span className="text-white/30 text-[0.8rem]">to</span>
+                                      <input
+                                        type="time"
+                                        value={schedule.close}
+                                        onChange={(e) => updateDaySchedule(day, { close: e.target.value })}
+                                        className="bg-white/10 border border-white/15 rounded-lg px-3 py-2 text-[0.85rem] text-white outline-none focus:border-primary/50 transition-all w-[120px] [color-scheme:dark]"
+                                      />
+                                    </div>
+                                  ) : (
+                                    <span className="text-[0.8rem] text-white/30 italic">Closed</span>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
 
                         <div className="space-y-2">
                           <div className="flex items-center justify-between ml-1 mr-1">
-                            <label className="text-[0.72rem] font-bold uppercase tracking-widest text-white/35">
+                            <label className="text-[0.72rem] font-bold uppercase tracking-widest text-primary/70">
                               Brief Description
                             </label>
-                            <span className="text-[0.7rem] text-white/25">
+                            <span className="text-[0.7rem] text-white/30">
                               {formData.description.length} / 280
                             </span>
                           </div>
@@ -628,25 +968,25 @@ export default function VenueOwnerOnboarding() {
                               })
                             }
                             placeholder="Tell players about your venue, facilities, and any special requirements..."
-                            className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-[1.05rem] outline-none focus:border-primary/50 focus:bg-white/[0.05] transition-all min-h-[130px] resize-none leading-relaxed"
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-[1.05rem] text-white outline-none focus:border-primary/50 focus:bg-white/10 transition-all min-h-[130px] resize-y leading-relaxed whitespace-pre-wrap"
                           />
                         </div>
 
                         {/* Tags */}
                         <div className="space-y-2">
                           <div className="flex items-center justify-between ml-1 mr-1">
-                            <label className="text-[0.72rem] font-bold uppercase tracking-widest text-white/35">
+                            <label className="text-[0.72rem] font-bold uppercase tracking-widest text-primary/70">
                               Tags
                             </label>
-                            <span className="text-[0.7rem] text-white/25">
+                            <span className="text-[0.7rem] text-white/30">
                               Press Enter or comma to add
                             </span>
                           </div>
-                          <div className={`w-full bg-white/[0.03] border rounded-xl px-4 py-3 transition-all flex flex-wrap gap-2 ${formData.tags.length > 0 ? "border-white/10" : "border-white/10"} focus-within:border-primary/50 focus-within:bg-white/[0.05]`}>
+                          <div className={`w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 transition-all flex flex-wrap gap-2 focus-within:border-primary/50 focus-within:bg-white/10`}>
                             {formData.tags.map((tag) => (
                               <span
                                 key={tag}
-                                className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-[0.78rem] font-bold rounded-lg"
+                                className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/20 border border-primary/30 text-primary text-[0.78rem] font-bold rounded-lg"
                               >
                                 {tag}
                                 <button
@@ -679,9 +1019,63 @@ export default function VenueOwnerOnboarding() {
                                 }
                               }}
                               placeholder={formData.tags.length === 0 ? "e.g. parking, floodlights, clay courts..." : ""}
-                              className="flex-1 min-w-[140px] bg-transparent text-[1rem] outline-none placeholder:text-white/20 py-1"
+                              className="flex-1 min-w-[140px] bg-transparent text-[1rem] text-white outline-none placeholder:text-white/20 py-1"
                             />
                           </div>
+                        </div>
+
+                        {/* QR Payment Image */}
+                        <div className="space-y-2">
+                          <label className="text-[0.72rem] font-bold uppercase tracking-widest text-primary/70 ml-1 flex items-center gap-2">
+                            <QrCode size={13} className="text-primary/70" />
+                            Payment QR Code <span className="text-primary/50">*</span>
+                          </label>
+                          <p className="text-[0.72rem] text-white/40 ml-1 mb-2">
+                            Upload your GCash, Maya, or bank QR code so players can pay you directly.
+                          </p>
+                          <input
+                            ref={qrInputRef}
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleQrSelect(file);
+                            }}
+                          />
+                          <div className="flex flex-wrap gap-3">
+                            {qrPreviews.map((preview, index) => (
+                              <div key={index} className="relative w-36 h-36 group">
+                                <Image
+                                  src={preview}
+                                  alt={`QR payment ${index + 1}`}
+                                  fill
+                                  className="rounded-2xl object-contain border border-white/10 bg-white/5"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removeQr(index)}
+                                  className="absolute -top-2 -right-2 size-6 rounded-full bg-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                >
+                                  <X size={14} className="text-white" />
+                                </button>
+                              </div>
+                            ))}
+                            {qrFiles.length < 5 && (
+                              <button
+                                type="button"
+                                onClick={() => qrInputRef.current?.click()}
+                                className={`flex flex-col items-center justify-center gap-2 w-36 h-36 rounded-2xl border border-dashed bg-white/5 hover:border-primary/30 hover:bg-white/10 transition-all ${errors.qrPayment ? "border-red-400/60" : "border-white/20"}`}
+                              >
+                                <QrCode size={28} className="text-white/30" />
+                                <span className="text-[0.65rem] font-bold text-white/30">
+                                  {qrFiles.length === 0 ? "Upload QR Code" : "Add Another"}
+                                </span>
+                              </button>
+                            )}
+                          </div>
+                          {errors.qrPayment && <p className="text-red-400 text-[0.72rem] ml-1">{errors.qrPayment}</p>}
+                          <p className="text-[0.7rem] text-white/40 ml-1">JPG, PNG, or WebP. Max 5MB.</p>
                         </div>
                       </div>
                     </div>
@@ -691,11 +1085,11 @@ export default function VenueOwnerOnboarding() {
                   {step === 4 && (
                     <div className="space-y-8">
                       <div>
-                        <h1 className="text-[2rem] md:text-[2.8rem] font-bold leading-[1.1] mb-3">
+                        <h1 className="text-[2rem] md:text-[2.8rem] font-bold leading-[1.1] mb-3 text-white">
                           All set!{" "}
                           <span className="text-primary italic">Let&apos;s review.</span>
                         </h1>
-                        <p className="text-[1rem] text-white/50 max-w-[440px]">
+                        <p className="text-[1rem] text-white/60 max-w-[440px]">
                           Take a quick look at your details before we finalize your venue
                           profile.
                         </p>
@@ -703,41 +1097,46 @@ export default function VenueOwnerOnboarding() {
 
                       <div className="space-y-3">
                         {/* Identity */}
-                        <div className="bg-white/[0.03] border border-white/8 rounded-2xl p-6 flex justify-between items-start group hover:border-white/12 transition-colors">
-                          <div>
-                            <h3 className="text-white/35 uppercase text-[0.68rem] font-bold tracking-[0.15em] mb-2">
-                              Venue Identity
-                            </h3>
-                            <p className="text-[1.3rem] font-bold leading-tight">
-                              {formData.venueName || (
-                                <span className="text-white/30 italic text-base">Not specified</span>
-                              )}
-                            </p>
-                            <span className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 bg-primary/10 text-primary text-[0.68rem] font-bold rounded-lg border border-primary/20">
-                              {VENUE_TYPES.find((v) => v.label === formData.venueType)?.icon}{" "}
-                              {formData.venueType}
-                            </span>
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex justify-between items-start group hover:border-white/20 transition-colors shadow-xl backdrop-blur-sm">
+                          <div className="flex items-start gap-4">
+                            {logoPreview && (
+                              <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border border-white/10">
+                                <Image src={logoPreview} alt="Logo" fill className="object-cover" />
+                              </div>
+                            )}
+                            <div>
+                              <h3 className="text-primary/50 uppercase text-[0.68rem] font-bold tracking-[0.15em] mb-2">
+                                Venue Identity
+                              </h3>
+                              <p className="text-[1.3rem] font-bold text-white leading-tight">
+                                {formData.venueName.trim() || "Your Venue Name"}
+                              </p>
+                              <span className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 bg-primary/20 text-primary text-[0.68rem] font-bold rounded-lg border border-primary/30">
+                                {VENUE_TYPES.find((v) => v.label === formData.venueType)?.icon}{" "}
+                                {formData.venueType}
+                              </span>
+                            </div>
                           </div>
                           <button
                             onClick={() => setStep(1)}
-                            className="text-white/30 hover:text-primary text-[0.75rem] font-bold transition-colors ml-4 flex-shrink-0"
+                            className="text-white/40 hover:text-primary text-[0.75rem] font-bold transition-colors ml-4 flex-shrink-0"
                           >
                             Edit
                           </button>
                         </div>
 
                         {/* Location */}
-                        <div className="bg-white/[0.03] border border-white/8 rounded-2xl p-6 flex justify-between items-start hover:border-white/12 transition-colors">
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex justify-between items-start hover:border-white/20 transition-colors shadow-xl backdrop-blur-sm">
                           <div>
-                            <h3 className="text-white/35 uppercase text-[0.68rem] font-bold tracking-[0.15em] mb-2">
+                            <h3 className="text-primary/50 uppercase text-[0.68rem] font-bold tracking-[0.15em] mb-2">
                               Location & Contact
                             </h3>
                             <p className="text-[1rem] text-white/80">
                               {formData.address || (
-                                <span className="text-white/30 italic">No address provided</span>
+                                <span className="text-white/20 italic">No address provided</span>
                               )}
                             </p>
-                            <p className="text-[0.9rem] text-white/45 mt-1">
+                            <p className="text-[0.9rem] text-white/50 mt-1">
                               {[formData.city, formData.phone].filter(Boolean).join(" · ") || (
                                 <span className="italic">No contact info</span>
                               )}
@@ -745,53 +1144,67 @@ export default function VenueOwnerOnboarding() {
                           </div>
                           <button
                             onClick={() => setStep(2)}
-                            className="text-white/30 hover:text-primary text-[0.75rem] font-bold transition-colors ml-4 flex-shrink-0"
+                            className="text-white/40 hover:text-primary text-[0.75rem] font-bold transition-colors ml-4 flex-shrink-0"
                           >
                             Edit
                           </button>
                         </div>
 
                         {/* Details */}
-                        <div className="bg-white/[0.03] border border-white/8 rounded-2xl p-6 flex justify-between items-start hover:border-white/12 transition-colors">
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex justify-between items-start hover:border-white/20 transition-colors shadow-xl backdrop-blur-sm">
                           <div className="min-w-0">
-                            <h3 className="text-white/35 uppercase text-[0.68rem] font-bold tracking-[0.15em] mb-2">
-                              Facilities & Pricing
+                            <h3 className="text-primary/50 uppercase text-[0.68rem] font-bold tracking-[0.15em] mb-2">
+                              Courts & Pricing
                             </h3>
-                            <p className="text-[1rem] text-white/80">
-                              {formData.courtsCount}{" "}
-                              {formData.courtsCount === "1" ? "Court" : "Courts"}
-                              {formData.pricing && (
-                                <>
-                                  {" "}
-                                  &middot;{" "}
-                                  <span className="text-primary font-bold">
-                                    ${formData.pricing}/hr
-                                  </span>
-                                </>
-                              )}
-                            </p>
-                            {formData.description && (
-                              <p className="text-[0.85rem] text-white/40 mt-1 italic line-clamp-2">
-                                &ldquo;{formData.description}&rdquo;
-                              </p>
-                            )}
-                            {formData.tags.length > 0 && (
-                              <div className="flex flex-wrap gap-1.5 mt-2">
-                                {formData.tags.map((tag) => (
-                                  <span key={tag} className="px-2 py-0.5 bg-primary/10 border border-primary/20 text-primary text-[0.68rem] font-bold rounded-md">
-                                    {tag}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
+                            <div className="space-y-1.5">
+                              {formData.courts.map((court, i) => (
+                                <p key={i} className="text-[0.95rem] text-white/80 flex items-center gap-2">
+                                  {court.name || `Court ${i + 1}`}
+                                  {court.pricePerHour && (
+                                    <span className="text-primary font-bold text-[0.85rem]">
+                                      ₱{court.pricePerHour}/hr
+                                    </span>
+                                  )}
+                                </p>
+                              ))}
+                            </div>
                           </div>
                           <button
                             onClick={() => setStep(3)}
-                            className="text-white/30 hover:text-primary text-[0.75rem] font-bold transition-colors ml-4 flex-shrink-0"
+                            className="text-white/40 hover:text-primary text-[0.75rem] font-bold transition-colors ml-4 flex-shrink-0"
                           >
                             Edit
                           </button>
                         </div>
+
+                        {/* QR Payment */}
+                        {qrPreviews.length > 0 && (
+                          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-white/20 transition-colors shadow-xl backdrop-blur-sm">
+                            <div className="flex justify-between items-start mb-4">
+                              <div>
+                                <h3 className="text-primary/50 uppercase text-[0.68rem] font-bold tracking-[0.15em] mb-1">
+                                  Payment QR Codes
+                                </h3>
+                                <p className="text-[0.75rem] text-white/40">
+                                  {qrPreviews.length} QR code{qrPreviews.length > 1 ? "s" : ""} uploaded — players will scan to pay
+                                </p>
+                              </div>
+                              <button
+                                onClick={() => setStep(3)}
+                                className="text-white/40 hover:text-primary text-[0.75rem] font-bold transition-colors ml-4 flex-shrink-0"
+                              >
+                                Edit
+                              </button>
+                            </div>
+                            <div className="flex flex-wrap gap-3">
+                              {qrPreviews.map((preview, index) => (
+                                <div key={index} className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border border-white/10 bg-white/5">
+                                  <Image src={preview} alt={`QR Payment ${index + 1}`} fill className="object-contain" />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -799,7 +1212,7 @@ export default function VenueOwnerOnboarding() {
               </AnimatePresence>
 
               {/* ── Navigation Controls ── */}
-              <div className="mt-10 flex items-center justify-between pt-8 border-t border-white/5">
+              <div className="mt-10 flex items-center justify-between pt-8 border-t border-white/10">
                 <button
                   onClick={prevStep}
                   className={`flex items-center gap-2 text-[0.9rem] font-bold transition-all ${
@@ -813,28 +1226,34 @@ export default function VenueOwnerOnboarding() {
                 </button>
 
                 <button
-                  onClick={step === 4 ? undefined : nextStep}
-                  className="flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-primary text-bg-dark font-bold text-[1rem] transition-all hover:scale-[1.02] active:scale-[0.99] shadow-lg shadow-primary/20"
+                  onClick={step === 4 ? () => mutation.mutate() : nextStep}
+                  disabled={mutation.isPending}
+                  className="flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-primary text-bg-dark font-bold text-[1rem] transition-all hover:scale-[1.02] active:scale-[0.99] shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {step === 4 ? "Complete Setup" : "Continue"}
-                  <ArrowRight size={18} />
+                  {mutation.isPending ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      Creating...
+                    </>
+                  ) : step === 4 ? "Complete Setup" : "Continue"}
+                  {!mutation.isPending && <ArrowRight size={18} />}
                 </button>
               </div>
+            </div>
             </div>
           </div>
         </main>
       </div>
 
       {/* ── Decorative Background ── */}
-      <div className="bg-dot-grid fixed inset-0 pointer-events-none z-[-1] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_40%,black_30%,transparent_100%)]" />
-      <div className="fixed bottom-0 left-0 w-[600px] h-[600px] bg-primary/[0.07] rounded-full blur-[140px] pointer-events-none z-[-1]" />
-      <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-primary/[0.04] rounded-full blur-[120px] pointer-events-none z-[-1]" />
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-primary/[0.025] rounded-full blur-[180px] pointer-events-none z-[-1]" />
+      <div className="bg-dot-grid fixed inset-0 pointer-events-none z-[-1] opacity-20 [mask-image:radial-gradient(ellipse_70%_70%_at_50%_40%,black_30%,transparent_100%)]" />
+      <div className="fixed bottom-0 left-0 w-[600px] h-[600px] bg-primary/[0.08] rounded-full blur-[140px] pointer-events-none z-[-1]" />
+      <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-primary/[0.05] rounded-full blur-[120px] pointer-events-none z-[-1]" />
 
       <div className="fixed left-1/2 top-0 -translate-x-1/2 w-px h-full bg-gradient-to-b from-transparent via-primary/10 to-transparent pointer-events-none z-[-1]" />
       <div className="fixed top-1/2 left-0 -translate-y-1/2 w-full h-px bg-gradient-to-r from-transparent via-primary/8 to-transparent pointer-events-none z-[-1]" />
 
-      <div className="fixed right-[-60px] bottom-[-100px] w-[380px] opacity-[0.04] text-primary rotate-[8deg] pointer-events-none z-[-1]">
+      <div className="fixed right-[-60px] bottom-[-100px] w-[380px] opacity-[0.03] text-primary rotate-[8deg] pointer-events-none z-[-1]">
         <svg viewBox="0 0 300 580" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
           <rect x="1" y="1" width="298" height="578" />
           <line x1="0" y1="290" x2="300" y2="290" />
@@ -845,9 +1264,6 @@ export default function VenueOwnerOnboarding() {
           <line x1="150" y1="170" x2="150" y2="410" />
         </svg>
       </div>
-
-      <div className="fixed bottom-[28%] left-[10%] w-10 h-10 border border-primary/10 rotate-45 pointer-events-none z-[-1]" />
-      <div className="fixed bottom-[28%] left-[10%] w-5 h-5 border border-primary/8 rotate-45 translate-x-[10px] translate-y-[10px] pointer-events-none z-[-1]" />
     </div>
   );
 }

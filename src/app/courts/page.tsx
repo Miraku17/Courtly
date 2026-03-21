@@ -369,7 +369,7 @@ export default function PublicCourtsPage() {
                       <div>
                         <span className="block text-[10px] font-bold uppercase tracking-widest text-text-muted/30">From</span>
                         <span className="text-2xl font-extrabold text-white sm:text-3xl">
-                          ${featuredVenue.priceFrom}
+                          ₱{featuredVenue.priceFrom}
                           <span className="text-sm font-medium text-text-muted/35">/hr</span>
                         </span>
                       </div>
@@ -722,7 +722,7 @@ export default function PublicCourtsPage() {
               {
                 num: "03",
                 title: "Book & Play",
-                desc: "Confirm instantly with secure payment. Receive digital access codes and directions directly on your phone.",
+                desc: "Confirm instantly and pay the venue directly via their QR code. Receive directions straight to your phone.",
                 icon: Target,
                 detail: "Instant digital confirmation",
                 color: "from-orange-500/20",

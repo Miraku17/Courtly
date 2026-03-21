@@ -116,7 +116,7 @@ export function PublicVenueCard({ venue, index = 0 }: PublicVenueCardProps) {
               From
             </span>
             <span className="text-lg font-extrabold text-white">
-              ${venue.priceFrom}
+              ₱{venue.priceFrom}
               <span className="text-[10px] font-medium text-text-muted/35">/hr</span>
             </span>
           </div>
