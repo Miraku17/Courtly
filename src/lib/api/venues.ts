@@ -22,6 +22,9 @@ export const createVenue = (data: {
 export const getMyVenue = () =>
   api.get("/venues/me").then((res) => res.data);
 
+export const getPublicVenues = () =>
+  api.get("/venues").then((res) => res.data);
+
 export const updateMyVenue = (data: {
   name?: string;
   type?: string;

@@ -1,6 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getAuthUser } from "@/lib/supabase/auth-guard";
+
+export async function GET() {
+  const supabase = createAdminClient();
+
+  const { data, error } = await supabase
+    .from("venues")
+    .select("*, courts(id, price_per_hour)")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ venues: data });
+}
 
 export async function POST(request: NextRequest) {
   const { user, error: authError } = await getAuthUser();
