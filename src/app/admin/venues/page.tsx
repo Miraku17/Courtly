@@ -244,7 +244,7 @@ export default function AdminVenuesPage() {
       {/* Venues Table */}
       <motion.section
         {...fadeIn(0.15)}
-        className="rounded-2xl border border-section-dark/10 bg-[#f5f5f5] overflow-hidden"
+        className="rounded-2xl border border-section-dark/10 bg-white shadow-sm shadow-section-dark/5 overflow-hidden"
       >
         {isLoading ? (
           <div className="flex items-center justify-center py-20">

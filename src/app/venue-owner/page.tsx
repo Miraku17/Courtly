@@ -16,15 +16,21 @@ import Counter from "@/components/Counter";
 import { useQuery } from "@tanstack/react-query";
 import { getProfile } from "@/lib/api/profiles";
 import { getMyVenue } from "@/lib/api/venues";
+import { getVenueBookings } from "@/lib/api/bookings";
 import { Clock, AlertTriangle } from "lucide-react";
+import type { Booking } from "@/types/booking";
 
-const recentBookings = [
-  { id: 1, player: "Alex Martinez", email: "alex.m@mail.com", venue: "Green Valley Tennis Club", date: "Mar 19, 2026", time: "14:00 - 15:30", amount: "₱3,500", status: "confirmed" },
-  { id: 2, player: "Sarah Kim", email: "s.kim@mail.com", venue: "Green Valley Tennis Club", date: "Mar 19, 2026", time: "16:00 - 17:00", amount: "₱2,500", status: "confirmed" },
-  { id: 3, player: "Mike Rivera", email: "m.rivera@mail.com", venue: "Downtown Padel Center", date: "Mar 20, 2026", time: "10:00 - 11:30", amount: "₱4,200", status: "pending" },
-  { id: 4, player: "Team Blazers", email: "blazers@team.com", venue: "Riverside Basketball Arena", date: "Mar 21, 2026", time: "18:00 - 20:00", amount: "₱6,000", status: "confirmed" },
-  { id: 5, player: "Emily Chen", email: "e.chen@mail.com", venue: "Downtown Padel Center", date: "Mar 22, 2026", time: "09:00 - 10:00", amount: "₱2,800", status: "pending" },
-];
+function formatTime(t: string) {
+  const [h, m] = t.split(":").map(Number);
+  const period = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, "0")} ${period}`;
+}
+
+function formatDate(dateStr: string) {
+  const d = new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
 
 const chartBars = [40, 55, 70, 45, 90, 60, 75, 50, 65, 55, 80, 100, 70, 85];
 
@@ -53,9 +59,25 @@ export default function VenueOwnerDashboard() {
     queryFn: getMyVenue,
   });
 
+  const { data: bookingsData } = useQuery({
+    queryKey: ["venue-bookings"],
+    queryFn: () => getVenueBookings(),
+  });
+
   const firstName = data?.profile?.first_name || "Owner";
   const venueStatus = venueData?.venue?.status as string | undefined;
   const adminNotes = venueData?.venue?.admin_notes as string | undefined;
+
+  const allBookings: Booking[] = bookingsData?.bookings ?? [];
+  const activeBookings = allBookings.filter(
+    (b) => b.status === "PENDING" || b.status === "CONFIRMED"
+  );
+  const confirmedBookings = allBookings.filter((b) => b.status === "CONFIRMED");
+  const monthlyRevenue = confirmedBookings.reduce(
+    (sum, b) => sum + Number(b.total_price),
+    0
+  );
+  const recentBookings = allBookings.slice(0, 5);
 
   return (
     <div className="space-y-6">
@@ -139,10 +161,10 @@ export default function VenueOwnerDashboard() {
             <div className="flex items-end gap-1 mb-4">
               <span className="text-[1.2rem] font-bold text-section-dark/40">₱</span>
               <Counter
-                value={42500}
+                value={monthlyRevenue}
                 fontSize={48}
                 padding={0}
-                places={[1000, 100, 10, 1]}
+                places={monthlyRevenue >= 10000 ? [10000, 1000, 100, 10, 1] : monthlyRevenue >= 1000 ? [1000, 100, 10, 1] : [100, 10, 1]}
                 gap={2}
                 textColor="#1a3a1a"
                 fontWeight="900"
@@ -207,10 +229,10 @@ export default function VenueOwnerDashboard() {
           <p className="text-text-muted-dark/60 text-[0.8rem] font-medium">Active Bookings</p>
           <div className="mt-1">
             <Counter
-              value={24}
+              value={activeBookings.length}
               fontSize={30}
               padding={0}
-              places={[10, 1]}
+              places={activeBookings.length >= 10 ? [10, 1] : [1]}
               gap={2}
               textColor="#1a1a1a"
               fontWeight="800"
@@ -347,7 +369,7 @@ export default function VenueOwnerDashboard() {
             <thead>
               <tr className="text-text-muted-dark/40 text-[0.6rem] uppercase tracking-[0.15em] bg-section-dark/3">
                 <th className="px-6 py-4 font-extrabold">Player</th>
-                <th className="px-6 py-4 font-extrabold hidden md:table-cell">Venue</th>
+                <th className="px-6 py-4 font-extrabold hidden md:table-cell">Court</th>
                 <th className="px-6 py-4 font-extrabold hidden sm:table-cell">Date &amp; Time</th>
                 <th className="px-6 py-4 font-extrabold">Amount</th>
                 <th className="px-6 py-4 font-extrabold">Status</th>
@@ -355,47 +377,62 @@ export default function VenueOwnerDashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-section-dark/6">
-              {recentBookings.map((booking) => (
-                <tr key={booking.id} className="hover:bg-section-dark/3 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="size-8 rounded-full bg-section-dark/8 flex items-center justify-center text-[0.65rem] font-bold text-section-dark shrink-0">
-                        {booking.player.split(" ").map(n => n[0]).join("")}
+              {recentBookings.length > 0 ? recentBookings.map((booking) => {
+                const playerName = booking.player
+                  ? `${booking.player.first_name} ${booking.player.last_name}`
+                  : "Player";
+                const playerEmail = booking.player?.email ?? "";
+                const initials = playerName.split(" ").map((n: string) => n[0]).join("");
+                return (
+                  <tr key={booking.id} className="hover:bg-section-dark/3 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="size-8 rounded-full bg-section-dark/8 flex items-center justify-center text-[0.65rem] font-bold text-section-dark shrink-0">
+                          {initials}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[0.8rem] font-semibold text-text-dark truncate">{playerName}</p>
+                          <p className="text-[0.6rem] text-text-muted-dark/40 truncate">{playerEmail}</p>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <p className="text-[0.8rem] font-semibold text-text-dark truncate">{booking.player}</p>
-                        <p className="text-[0.6rem] text-text-muted-dark/40 truncate">{booking.email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 hidden md:table-cell">
-                    <p className="text-[0.8rem] font-medium text-text-dark/70">{booking.venue}</p>
-                  </td>
-                  <td className="px-6 py-4 hidden sm:table-cell">
-                    <p className="text-[0.8rem] text-text-dark/70">{booking.date}</p>
-                    <p className="text-[0.6rem] text-text-muted-dark/40 uppercase">{booking.time}</p>
-                  </td>
-                  <td className="px-6 py-4">
-                    <p className="text-[0.8rem] font-bold text-section-dark">{booking.amount}</p>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`px-2.5 py-1 rounded-full text-[0.55rem] font-bold uppercase tracking-wider border ${
-                        booking.status === "confirmed"
-                          ? "bg-emerald-50 text-emerald-600 border-emerald-200"
-                          : "bg-amber-50 text-amber-600 border-amber-200"
-                      }`}
-                    >
-                      {booking.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="p-2 hover:bg-section-dark/5 rounded-lg text-text-muted-dark/30 hover:text-section-dark transition-colors">
-                      <MoreVertical size={16} />
-                    </button>
+                    </td>
+                    <td className="px-6 py-4 hidden md:table-cell">
+                      <p className="text-[0.8rem] font-medium text-text-dark/70">{booking.court?.name ?? "Court"}</p>
+                    </td>
+                    <td className="px-6 py-4 hidden sm:table-cell">
+                      <p className="text-[0.8rem] text-text-dark/70">{formatDate(booking.booking_date)}</p>
+                      <p className="text-[0.6rem] text-text-muted-dark/40 uppercase">{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <p className="text-[0.8rem] font-bold text-section-dark">₱{booking.total_price}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-2.5 py-1 rounded-full text-[0.55rem] font-bold uppercase tracking-wider border ${
+                          booking.status === "CONFIRMED"
+                            ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                            : booking.status === "PENDING"
+                            ? "bg-amber-50 text-amber-600 border-amber-200"
+                            : "bg-red-50 text-red-500 border-red-200"
+                        }`}
+                      >
+                        {booking.status.toLowerCase()}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <Link href="/venue-owner/bookings" className="p-2 hover:bg-section-dark/5 rounded-lg text-text-muted-dark/30 hover:text-section-dark transition-colors inline-block">
+                        <MoreVertical size={16} />
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              }) : (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-text-muted-dark/40 text-sm">
+                    No bookings yet. They&apos;ll appear here when players book your courts.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
@@ -403,7 +440,7 @@ export default function VenueOwnerDashboard() {
         {/* Table Footer */}
         <div className="px-6 py-3.5 bg-section-dark/3 border-t border-section-dark/6 flex justify-between items-center">
           <span className="text-[0.7rem] text-text-muted-dark/40">
-            Showing {recentBookings.length} of 24 bookings
+            Showing {recentBookings.length} of {allBookings.length} bookings
           </span>
           <div className="flex gap-1.5">
             <button className="p-1.5 rounded-lg border border-section-dark/10 text-text-muted-dark/20 opacity-30" disabled>

@@ -25,6 +25,9 @@ import {
   Check,
   ImagePlus,
   Trash2,
+  Shield,
+  ScrollText,
+  Plus,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { ConfirmModal } from "@/components/common/confirm-modal";
@@ -68,9 +71,14 @@ export default function EditVenuePage() {
     operatingHours: {} as OperatingHours,
     tags: [] as string[],
     logoUrl: "",
+    venueRules: [] as string[],
+    safetyHealth: [] as string[],
+    cancellationPolicy: "",
   });
 
   const [tagInput, setTagInput] = useState("");
+  const [ruleInput, setRuleInput] = useState("");
+  const [safetyInput, setSafetyInput] = useState("");
 
   const { data: venueData, isLoading } = useQuery({
     queryKey: ["my-venue"],
@@ -93,6 +101,9 @@ export default function EditVenuePage() {
         operatingHours: v.operating_hours || {},
         tags: v.tags || [],
         logoUrl: v.image_url || "",
+        venueRules: v.venue_rules || [],
+        safetyHealth: v.safety_health || [],
+        cancellationPolicy: v.cancellation_policy || "",
       });
     }
   }, [venueData]);
@@ -159,6 +170,9 @@ export default function EditVenuePage() {
         lng: form.lng,
         operatingHours: form.operatingHours,
         tags: form.tags.length > 0 ? form.tags : undefined,
+        venueRules: form.venueRules,
+        safetyHealth: form.safetyHealth,
+        cancellationPolicy: form.cancellationPolicy || undefined,
       });
     },
     onSuccess: () => {
@@ -482,6 +496,126 @@ export default function EditVenuePage() {
                 })}
               </div>
             </motion.div>
+
+            {/* Venue Policies */}
+            <motion.div {...fadeIn(0.2)} className="rounded-2xl border border-border-light bg-surface p-6 space-y-6 shadow-sm">
+              <h2 className="text-[0.7rem] font-bold text-text-dark uppercase tracking-[0.15em] flex items-center gap-2">
+                <ScrollText size={13} className="text-muted-light" />
+                Venue Policies
+              </h2>
+
+              {/* Venue Rules */}
+              <div className="space-y-3">
+                <label className="text-[0.72rem] font-bold uppercase tracking-widest text-muted-light ml-1">
+                  Venue Rules
+                </label>
+                <div className="space-y-2">
+                  {form.venueRules.map((rule, i) => (
+                    <div key={i} className="flex items-center gap-2 rounded-xl border border-border-light bg-bg-light px-4 py-2.5">
+                      <span className="flex-1 text-[0.85rem] text-text-dark">{rule}</span>
+                      <button
+                        type="button"
+                        onClick={() => updateForm({ venueRules: form.venueRules.filter((_, idx) => idx !== i) })}
+                        className="text-muted-light hover:text-red-400 transition-colors"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={ruleInput}
+                    onChange={(e) => setRuleInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && ruleInput.trim()) {
+                        e.preventDefault();
+                        updateForm({ venueRules: [...form.venueRules, ruleInput.trim()] });
+                        setRuleInput("");
+                      }
+                    }}
+                    placeholder="e.g. Arrive 10 mins early"
+                    className="flex-1 bg-surface border border-border-light rounded-xl px-4 py-2.5 text-[0.85rem] text-text-dark outline-none focus:border-section-dark/30 transition-all placeholder:text-muted-light"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (ruleInput.trim()) {
+                        updateForm({ venueRules: [...form.venueRules, ruleInput.trim()] });
+                        setRuleInput("");
+                      }
+                    }}
+                    className="flex items-center gap-1 rounded-xl bg-section-dark/10 px-3 py-2.5 text-[0.75rem] font-bold text-section-dark hover:bg-section-dark/20 transition-colors"
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Safety & Health */}
+              <div className="space-y-3">
+                <label className="text-[0.72rem] font-bold uppercase tracking-widest text-muted-light ml-1 flex items-center gap-1.5">
+                  <Shield size={11} />
+                  Safety & Health
+                </label>
+                <div className="space-y-2">
+                  {form.safetyHealth.map((item, i) => (
+                    <div key={i} className="flex items-center gap-2 rounded-xl border border-border-light bg-bg-light px-4 py-2.5">
+                      <span className="flex-1 text-[0.85rem] text-text-dark">{item}</span>
+                      <button
+                        type="button"
+                        onClick={() => updateForm({ safetyHealth: form.safetyHealth.filter((_, idx) => idx !== i) })}
+                        className="text-muted-light hover:text-red-400 transition-colors"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={safetyInput}
+                    onChange={(e) => setSafetyInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && safetyInput.trim()) {
+                        e.preventDefault();
+                        updateForm({ safetyHealth: [...form.safetyHealth, safetyInput.trim()] });
+                        setSafetyInput("");
+                      }
+                    }}
+                    placeholder="e.g. First aid kit on site"
+                    className="flex-1 bg-surface border border-border-light rounded-xl px-4 py-2.5 text-[0.85rem] text-text-dark outline-none focus:border-section-dark/30 transition-all placeholder:text-muted-light"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (safetyInput.trim()) {
+                        updateForm({ safetyHealth: [...form.safetyHealth, safetyInput.trim()] });
+                        setSafetyInput("");
+                      }
+                    }}
+                    className="flex items-center gap-1 rounded-xl bg-section-dark/10 px-3 py-2.5 text-[0.75rem] font-bold text-section-dark hover:bg-section-dark/20 transition-colors"
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Cancellation Policy */}
+              <div className="space-y-2">
+                <label className="text-[0.72rem] font-bold uppercase tracking-widest text-muted-light ml-1">
+                  Cancellation Policy
+                </label>
+                <textarea
+                  value={form.cancellationPolicy}
+                  onChange={(e) => updateForm({ cancellationPolicy: e.target.value })}
+                  placeholder="Describe your cancellation and refund policy..."
+                  className="w-full bg-surface border border-border-light rounded-xl px-5 py-3.5 text-[0.85rem] text-text-dark outline-none focus:border-section-dark/30 transition-all min-h-[80px] resize-none leading-relaxed placeholder:text-muted-light"
+                />
+              </div>
+            </motion.div>
           </div>
 
           {/* Right Column */}
@@ -558,7 +692,7 @@ export default function EditVenuePage() {
               <h2 className="text-[0.7rem] font-bold text-text-dark uppercase tracking-[0.15em]">
                 Pin Location
               </h2>
-              <div className="h-[320px] rounded-xl overflow-hidden border border-border-light">
+              <div className="relative z-0 h-[320px] rounded-xl overflow-hidden border border-border-light">
                 <MapPicker
                   lat={form.lat}
                   lng={form.lng}

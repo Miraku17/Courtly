@@ -72,7 +72,7 @@ export default function AdminDashboard() {
         {/* Total Venues */}
         <motion.div
           {...fadeIn(0.1)}
-          className="rounded-2xl p-6 border border-section-dark/8 bg-[#f5f5f5] group hover:border-section-dark/15 transition-all duration-300"
+          className="rounded-2xl p-6 border border-section-dark/8 bg-white shadow-sm shadow-section-dark/5 group hover:border-section-dark/15 transition-all duration-300"
         >
           <div className="flex justify-between items-start mb-4">
             <div className="p-3 rounded-xl bg-section-dark/5 text-section-dark group-hover:scale-110 transition-transform">
@@ -186,7 +186,7 @@ export default function AdminDashboard() {
       {/* Pending Venues List */}
       <motion.section
         {...fadeIn(0.3)}
-        className="rounded-2xl border border-section-dark/10 bg-[#f5f5f5] overflow-hidden"
+        className="rounded-2xl border border-section-dark/10 bg-white shadow-sm shadow-section-dark/5 overflow-hidden"
       >
         <div className="p-5 sm:p-6 border-b border-section-dark/8 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>

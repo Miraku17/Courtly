@@ -17,6 +17,9 @@ export const createVenue = (data: {
   lng?: number;
   operatingHours?: OperatingHours;
   tags?: string[];
+  venueRules?: string[];
+  safetyHealth?: string[];
+  cancellationPolicy?: string;
 }) => api.post("/venues", data).then((res) => res.data);
 
 export const getMyVenue = () =>
@@ -24,6 +27,9 @@ export const getMyVenue = () =>
 
 export const getPublicVenues = () =>
   api.get("/venues").then((res) => res.data);
+
+export const getPublicVenue = (id: string) =>
+  api.get(`/venues/${id}`).then((res) => res.data);
 
 export const updateMyVenue = (data: {
   name?: string;
@@ -38,6 +44,9 @@ export const updateMyVenue = (data: {
   lng?: number;
   operatingHours?: OperatingHours;
   tags?: string[];
+  venueRules?: string[];
+  safetyHealth?: string[];
+  cancellationPolicy?: string;
 }) => api.patch("/venues/me", data).then((res) => res.data);
 
 export const uploadVenueLogo = async (file: File) => {

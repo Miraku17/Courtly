@@ -11,6 +11,7 @@ export const config = {
     "/signin",
     "/signup",
     "/courts",
+    "/courts/:path*",
     "/list-venue",
     "/dashboard/:path*",
     "/onboarding/:path*",

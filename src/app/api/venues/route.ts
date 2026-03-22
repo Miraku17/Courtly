@@ -8,7 +8,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("venues")
-    .select("*, courts(id, price_per_hour)")
+    .select("*, courts(id, price_per_hour), venue_photos(id, url, position)")
     .eq("status", "APPROVED")
     .order("created_at", { ascending: false });
 
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
   if (authError) return authError;
 
   const body = await request.json();
-  const { name, type, address, city, phone, email, description, imageUrl, lat, lng, operatingHours, tags } =
+  const { name, type, address, city, phone, email, description, imageUrl, lat, lng, operatingHours, tags, venueRules, safetyHealth, cancellationPolicy } =
     body;
 
   if (!name || !type || !address || !city) {
@@ -52,6 +52,9 @@ export async function POST(request: NextRequest) {
       lng: lng ?? null,
       operating_hours: operatingHours ?? {},
       tags: tags ?? [],
+      venue_rules: venueRules ?? [],
+      safety_health: safetyHealth ?? [],
+      cancellation_policy: cancellationPolicy ?? null,
     })
     .select()
     .single();

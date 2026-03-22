@@ -59,7 +59,7 @@ export default function AdminLayout({
   };
 
   return (
-    <div className="flex min-h-screen bg-bg-light font-clash">
+    <div className="flex min-h-screen bg-[#f8fafc] font-clash">
       {/* Sidebar - Desktop */}
       <aside className="hidden md:flex w-64 flex-col fixed h-full z-50 bg-bg-dark">
         {/* Branding */}
@@ -131,7 +131,7 @@ export default function AdminLayout({
       </aside>
 
       {/* Top Navbar - Desktop */}
-      <header className="hidden md:flex fixed top-0 right-0 w-[calc(100%-16rem)] z-30 h-14 bg-bg-light/80 backdrop-blur-xl border-b border-section-dark/8 items-center justify-between px-8">
+      <header className="hidden md:flex fixed top-0 right-0 w-[calc(100%-16rem)] z-30 h-14 bg-[#f8fafc]/80 backdrop-blur-xl border-b border-section-dark/8 items-center justify-between px-8">
         <div className="flex-1" />
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2.5">
@@ -160,7 +160,7 @@ export default function AdminLayout({
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 md:ml-64 pb-24 md:pb-0 min-h-screen bg-bg-light md:pt-14">
+      <main className="flex-1 md:ml-64 pb-24 md:pb-0 min-h-screen bg-[#f8fafc] md:pt-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           {children}
         </div>

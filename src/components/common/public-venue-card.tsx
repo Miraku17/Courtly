@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Star, MapPin, ArrowRight, Clock, Users } from "lucide-react";
+import { Star, MapPin, ArrowRight, Clock, Users, Zap } from "lucide-react";
 import { motion } from "framer-motion";
+import { venueSlug } from "@/lib/utils";
 
 type DaySchedule = { enabled: boolean; open: string; close: string };
 
@@ -18,6 +19,7 @@ export type PublicVenue = {
   tags: string[];
   operating_hours: Record<string, DaySchedule> | null;
   courts: { id: string; price_per_hour: number }[];
+  venue_photos: { id: string; url: string; position: number }[];
 };
 
 function getIsOpen(hours: Record<string, DaySchedule> | null): boolean {
@@ -59,8 +61,10 @@ export function PublicVenueCard({ venue, index = 0 }: PublicVenueCardProps) {
   const priceFrom = venue.courts.length > 0
     ? Math.min(...venue.courts.map((c) => c.price_per_hour))
     : null;
-  const image = venue.image_url || "/logo_final.png";
-  const isPlaceholder = !venue.image_url;
+  const coverPhoto = venue.venue_photos
+    ?.sort((a, b) => a.position - b.position)[0]?.url;
+  const image = coverPhoto || "/hero_1.webp";
+  const isPlaceholder = !coverPhoto;
 
   return (
     <motion.div
@@ -74,11 +78,11 @@ export function PublicVenueCard({ venue, index = 0 }: PublicVenueCardProps) {
         ease: [0.25, 0.1, 0.25, 1],
         layout: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] },
       }}
-      className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.02] transition-all duration-300 hover:border-primary/25 hover:bg-white/[0.04] hover:shadow-[0_8px_40px_rgba(217,241,112,0.06)]"
+      className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/[0.06] bg-[#121c12]/40 backdrop-blur-sm transition-all duration-300 hover:border-primary/25 hover:bg-white/[0.04] hover:shadow-[0_8px_40px_rgba(217,241,112,0.06)]"
     >
-      <Link href="/signin" className="absolute inset-0 z-10" />
+      <Link href={`/courts/${venueSlug(venue.name, venue.id)}`} className="absolute inset-0 z-10" />
 
-      {/* Image */}
+      {/* Image Container */}
       <div className="relative aspect-[16/10] overflow-hidden bg-white/[0.04]">
         <Image
           src={image}
@@ -87,90 +91,90 @@ export function PublicVenueCard({ venue, index = 0 }: PublicVenueCardProps) {
           unoptimized
           className={`transition-transform duration-700 group-hover:scale-105 ${
             isPlaceholder
-              ? "object-contain p-10 opacity-20"
-              : "object-contain p-6"
+              ? "object-cover opacity-20"
+              : "object-cover"
           }`}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-bg-dark/60 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-        {/* Open/Closed status */}
-        <div className="absolute left-3 top-3 z-20 flex items-center gap-1.5 rounded-full bg-bg-dark/60 px-2.5 py-1 backdrop-blur-md">
+        {/* Rating Overlay */}
+        <div className="absolute right-3 top-3 z-20 flex items-center gap-1 rounded-lg bg-black/40 px-2 py-1 backdrop-blur-md border border-white/10">
+          <Star size={12} className="fill-primary text-primary" />
+          <span className="text-[11px] font-bold text-white">4.9</span>
+        </div>
+
+        {/* Status */}
+        <div className="absolute left-3 top-3 z-20 flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 backdrop-blur-md border border-white/10">
           <span
             className={`size-1.5 rounded-full ${isOpen ? "bg-emerald-400 animate-pulse" : "bg-red-400"}`}
           />
-          <span className="text-[10px] font-semibold text-white/80">
+          <span className="text-[10px] font-black uppercase tracking-widest text-white/90">
             {isOpen ? "Open" : "Closed"}
           </span>
         </div>
 
-        {/* Sport type badge */}
-        <div className="absolute bottom-3 left-3 z-20 flex gap-1.5">
-          <span className="rounded-md bg-primary/90 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-text-dark backdrop-blur-sm">
-            {venue.type}
-          </span>
+        {/* Bottom Left Info */}
+        <div className="absolute bottom-3 left-3 z-20 flex flex-col gap-1.5">
+          <div className="flex gap-1.5">
+            <span className="rounded-md bg-primary px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.1em] text-text-dark">
+              {venue.type}
+            </span>
+            <span className="flex items-center gap-1 rounded-md bg-white/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white backdrop-blur-md">
+              <Zap size={9} className="fill-white" />
+              Instant
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex flex-1 flex-col p-4 sm:p-5">
-        <h3 className="mb-1 text-[15px] font-bold leading-snug text-white transition-colors group-hover:text-primary sm:text-base">
-          {venue.name}
-        </h3>
+      <div className="flex flex-1 flex-col p-5">
+        <div className="mb-2 flex items-center justify-between gap-4">
+          <h3 className="font-panchang text-sm font-bold uppercase tracking-tight text-white transition-colors group-hover:text-primary line-clamp-1">
+            {venue.name}
+          </h3>
+        </div>
 
-        <div className="mb-3 flex items-center gap-1.5 text-[11px] text-text-muted/45">
-          <MapPin size={10} className="flex-shrink-0 text-primary/50" />
+        <div className="mb-4 flex items-center gap-1.5 text-[11px] font-medium text-text-muted/40">
+          <MapPin size={11} className="flex-shrink-0 text-primary/60" />
           <span className="line-clamp-1">{venue.address}, {venue.city}</span>
         </div>
 
         {/* Meta row */}
-        <div className="mb-3 flex items-center gap-3 text-[10px] text-text-muted/35">
-          <span className="flex items-center gap-1">
-            <Users size={10} />
-            {venue.courts.length} {venue.courts.length === 1 ? "court" : "courts"}
-          </span>
-          <span className="size-0.5 rounded-full bg-text-muted/20" />
-          <span className="flex items-center gap-1">
-            <Clock size={10} />
-            {openHours}
-          </span>
-        </div>
-
-        {/* Tags */}
-        <div className="mb-4 flex flex-wrap gap-1.5">
-          {venue.tags.slice(0, 3).map((tag) => (
-            <span
-              key={tag}
-              className="rounded-md border border-white/[0.06] bg-white/[0.03] px-2 py-0.5 text-[9px] font-medium text-text-muted/40 capitalize"
-            >
-              {tag}
+        <div className="mb-5 grid grid-cols-2 gap-2">
+          <div className="flex items-center gap-2 rounded-lg bg-white/[0.03] p-2 border border-white/[0.05]">
+            <Users size={12} className="text-text-muted/30" />
+            <span className="text-[10px] font-bold text-text-muted/50">
+              {venue.courts.length} {venue.courts.length === 1 ? "Court" : "Courts"}
             </span>
-          ))}
-          {venue.tags.length > 3 && (
-            <span className="rounded-md border border-white/[0.06] bg-white/[0.03] px-2 py-0.5 text-[9px] font-medium text-text-muted/30">
-              +{venue.tags.length - 3}
+          </div>
+          <div className="flex items-center gap-2 rounded-lg bg-white/[0.03] p-2 border border-white/[0.05]">
+            <Clock size={12} className="text-text-muted/30" />
+            <span className="text-[10px] font-bold text-text-muted/50">
+              {isOpen ? "Closes 10 PM" : "Opens 6 AM"}
             </span>
-          )}
+          </div>
         </div>
 
         {/* Footer */}
-        <div className="mt-auto flex items-center justify-between border-t border-white/[0.05] pt-3">
+        <div className="mt-auto flex items-center justify-between border-t border-white/[0.05] pt-4">
           <div>
-            <span className="mb-0.5 block text-[9px] font-bold uppercase tracking-widest text-text-muted/25">
-              From
+            <span className="mb-0.5 block text-[9px] font-black uppercase tracking-[0.2em] text-text-muted/20">
+              Hourly from
             </span>
             {priceFrom !== null ? (
-              <span className="text-lg font-extrabold text-white">
+              <span className="text-xl font-black text-white">
                 ₱{priceFrom}
-                <span className="text-[10px] font-medium text-text-muted/35">/hr</span>
               </span>
             ) : (
               <span className="text-[13px] font-bold text-text-muted/30">—</span>
             )}
           </div>
-          <div className="z-20 flex items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3.5 py-2 text-[10px] font-bold uppercase tracking-wider text-white transition-all duration-300 group-hover:border-primary group-hover:bg-primary group-hover:text-text-dark">
+          <div className="z-20 flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-text-dark transition-all duration-300 group-hover:scale-105 active:scale-95 group-hover:shadow-[0_0_20px_rgba(217,241,112,0.3)]">
             Book
             <ArrowRight
-              size={11}
+              size={12}
+              strokeWidth={3}
               className="transition-transform duration-300 group-hover:translate-x-0.5"
             />
           </div>
