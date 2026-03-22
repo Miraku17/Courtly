@@ -2,7 +2,14 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getMyVenue, updateMyVenue, uploadVenueLogo } from "@/lib/api/venues";
+import {
+  getMyVenue,
+  updateMyVenue,
+  uploadVenueLogo,
+  getVenuePhotos,
+  uploadVenuePhotos,
+  deleteVenuePhoto,
+} from "@/lib/api/venues";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import {
@@ -16,6 +23,8 @@ import {
   Camera,
   X,
   Check,
+  ImagePlus,
+  Trash2,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { ConfirmModal } from "@/components/common/confirm-modal";
@@ -36,9 +45,12 @@ const fadeIn = (delay: number) => ({
   transition: { delay, duration: 0.4 },
 });
 
+const MAX_PHOTOS = 10;
+
 export default function EditVenuePage() {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -124,6 +136,17 @@ export default function EditVenuePage() {
       if (logoFile) {
         await uploadVenueLogo(logoFile);
       }
+
+      // Delete photos marked for removal
+      for (const photoId of photosToDelete) {
+        await deleteVenuePhoto(photoId);
+      }
+
+      // Upload new staged photos
+      if (pendingPhotos.length > 0) {
+        await uploadVenuePhotos(pendingPhotos);
+      }
+
       await updateMyVenue({
         name: form.name,
         type: form.type,
@@ -141,8 +164,14 @@ export default function EditVenuePage() {
     onSuccess: () => {
       toast.success("Venue updated successfully!");
       setLogoFile(null);
+      // Clean up pending photo previews
+      pendingPreviews.forEach((url) => URL.revokeObjectURL(url));
+      setPendingPhotos([]);
+      setPendingPreviews([]);
+      setPhotosToDelete([]);
       setShowConfirm(false);
       queryClient.invalidateQueries({ queryKey: ["my-venue"] });
+      queryClient.invalidateQueries({ queryKey: ["venue-photos"] });
     },
     onError: (error: any) => {
       const message =
@@ -150,6 +179,70 @@ export default function EditVenuePage() {
       toast.error(message);
     },
   });
+
+  // --- Venue Photos (staged locally, uploaded on Save) ---
+  const { data: photosData } = useQuery({
+    queryKey: ["venue-photos"],
+    queryFn: getVenuePhotos,
+    enabled: !!venueData?.venue,
+  });
+
+  const savedPhotos: { id: string; url: string; position: number }[] =
+    photosData?.photos ?? [];
+
+  // Staged new photos (not yet uploaded)
+  const [pendingPhotos, setPendingPhotos] = useState<File[]>([]);
+  const [pendingPreviews, setPendingPreviews] = useState<string[]>([]);
+  // IDs of saved photos marked for deletion
+  const [photosToDelete, setPhotosToDelete] = useState<string[]>([]);
+
+  // Photos currently visible = saved (minus marked for deletion) + pending
+  const visibleSavedPhotos = savedPhotos.filter((p) => !photosToDelete.includes(p.id));
+  const totalPhotoCount = visibleSavedPhotos.length + pendingPhotos.length;
+
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    const validFiles = files.filter((f) => f.size <= 5 * 1024 * 1024);
+    if (validFiles.length < files.length) {
+      toast.error("Some files exceeded 5MB and were skipped");
+    }
+
+    const remaining = MAX_PHOTOS - totalPhotoCount;
+    if (remaining <= 0) {
+      toast.error(`Maximum ${MAX_PHOTOS} photos allowed`);
+      return;
+    }
+
+    const filesToAdd = validFiles.slice(0, remaining);
+    if (filesToAdd.length < validFiles.length) {
+      toast.error(`Only ${remaining} more photo(s) allowed — some were skipped`);
+    }
+
+    setPendingPhotos((prev) => [...prev, ...filesToAdd]);
+    setPendingPreviews((prev) => [
+      ...prev,
+      ...filesToAdd.map((f) => URL.createObjectURL(f)),
+    ]);
+
+    // Reset file input so the same file can be selected again
+    if (photoInputRef.current) photoInputRef.current.value = "";
+  };
+
+  const removePendingPhoto = (index: number) => {
+    URL.revokeObjectURL(pendingPreviews[index]);
+    setPendingPhotos((prev) => prev.filter((_, i) => i !== index));
+    setPendingPreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const markSavedPhotoForDeletion = (photoId: string) => {
+    setPhotosToDelete((prev) => [...prev, photoId]);
+  };
+
+  const undoPhotoDelete = (photoId: string) => {
+    setPhotosToDelete((prev) => prev.filter((id) => id !== photoId));
+  };
 
   if (isLoading) {
     return (
@@ -172,9 +265,22 @@ export default function EditVenuePage() {
         {/* Header */}
         <motion.div {...fadeIn(0)} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-[1.6rem] sm:text-[2rem] font-extrabold text-text-dark tracking-tight">
-              My Venue
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-[1.6rem] sm:text-[2rem] font-extrabold text-text-dark tracking-tight">
+                My Venue
+              </h1>
+              {venueData?.venue?.status && (
+                <span className={`px-2.5 py-1 rounded-full text-[0.55rem] font-bold uppercase tracking-wider border ${
+                  venueData.venue.status === "APPROVED"
+                    ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                    : venueData.venue.status === "PENDING"
+                    ? "bg-amber-50 text-amber-600 border-amber-200"
+                    : "bg-red-50 text-red-600 border-red-200"
+                }`}>
+                  {venueData.venue.status}
+                </span>
+              )}
+            </div>
             <p className="text-text-muted-dark text-[0.85rem] mt-0.5">
               Update your venue details, location, and operating hours.
             </p>
@@ -463,6 +569,135 @@ export default function EditVenuePage() {
                 <MapPin size={11} className="text-section-dark/50" />
                 {form.lat.toFixed(4)}, {form.lng.toFixed(4)}
               </p>
+            </motion.div>
+
+            {/* Venue Photos */}
+            <motion.div {...fadeIn(0.25)} className="rounded-2xl border border-border-light bg-surface p-6 space-y-5 shadow-sm">
+              <div className="flex items-center justify-between">
+                <h2 className="text-[0.7rem] font-bold text-text-dark uppercase tracking-[0.15em] flex items-center gap-2">
+                  <ImagePlus size={13} className="text-muted-light" />
+                  Venue Photos
+                </h2>
+                <span className={`text-[0.7rem] font-bold tabular-nums ${totalPhotoCount >= MAX_PHOTOS ? "text-red-400" : "text-muted-light"}`}>
+                  {totalPhotoCount}/{MAX_PHOTOS}
+                </span>
+              </div>
+
+              <p className="text-[0.75rem] text-muted-light">
+                Showcase your courts, facilities, and surroundings. The first photo will be used as the cover.
+                {(pendingPhotos.length > 0 || photosToDelete.length > 0) && (
+                  <span className="block mt-1 text-amber-500 font-medium">
+                    You have unsaved photo changes — press Save to apply.
+                  </span>
+                )}
+              </p>
+
+              {/* Upload Area */}
+              {totalPhotoCount < MAX_PHOTOS && (
+                <label className="flex items-center justify-center rounded-xl border-2 border-dashed border-border-light bg-bg-light py-8 hover:border-section-dark/30 transition-colors cursor-pointer group">
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    multiple
+                    onChange={handlePhotoSelect}
+                    className="hidden"
+                  />
+                  <div className="flex flex-col items-center gap-2 text-center">
+                    <Upload size={24} className="text-muted-light group-hover:text-section-dark/60 transition-colors" />
+                    <div>
+                      <p className="text-[0.8rem] text-text-dark/60">
+                        Click to upload or drag & drop
+                      </p>
+                      <p className="text-[0.68rem] text-muted-light mt-0.5">
+                        PNG, JPG, WebP up to 5MB &middot; {MAX_PHOTOS - totalPhotoCount} remaining
+                      </p>
+                    </div>
+                  </div>
+                </label>
+              )}
+
+              {/* Photo Grid */}
+              {(visibleSavedPhotos.length > 0 || pendingPreviews.length > 0) && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {/* Saved photos (not marked for deletion) */}
+                  {visibleSavedPhotos.map((photo, i) => (
+                    <div
+                      key={photo.id}
+                      className="relative aspect-[4/3] rounded-xl overflow-hidden border border-border-light group"
+                    >
+                      <img
+                        src={photo.url}
+                        alt={`Venue photo ${i + 1}`}
+                        className="size-full object-cover"
+                      />
+                      {i === 0 && pendingPreviews.length === 0 && (
+                        <span className="absolute top-2 left-2 rounded-md bg-section-dark px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-white">
+                          Cover
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => markSavedPhotoForDeletion(photo.id)}
+                        className="absolute top-2 right-2 flex size-7 items-center justify-center rounded-lg bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  ))}
+
+                  {/* Pending photos (staged, not yet uploaded) */}
+                  {pendingPreviews.map((src, i) => (
+                    <div
+                      key={`pending-${i}`}
+                      className="relative aspect-[4/3] rounded-xl overflow-hidden border-2 border-dashed border-amber-400/40 group"
+                    >
+                      <img
+                        src={src}
+                        alt={`New photo ${i + 1}`}
+                        className="size-full object-cover"
+                      />
+                      <span className="absolute bottom-2 left-2 rounded-md bg-amber-500 px-2 py-0.5 text-[0.55rem] font-bold uppercase tracking-wider text-white">
+                        New
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removePendingPhoto(i)}
+                        className="absolute top-2 right-2 flex size-7 items-center justify-center rounded-lg bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Photos marked for deletion (undo option) */}
+              {photosToDelete.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-[0.7rem] font-bold uppercase tracking-wider text-red-400">
+                    Marked for removal ({photosToDelete.length})
+                  </p>
+                  <div className="flex gap-2 flex-wrap">
+                    {photosToDelete.map((photoId) => {
+                      const photo = savedPhotos.find((p) => p.id === photoId);
+                      if (!photo) return null;
+                      return (
+                        <div key={photoId} className="relative size-16 rounded-lg overflow-hidden border border-red-300/30 opacity-50 group">
+                          <img src={photo.url} alt="Removed" className="size-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => undoPhotoDelete(photoId)}
+                            className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <span className="text-[0.6rem] font-bold text-white">Undo</span>
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </motion.div>
           </div>
         </div>

@@ -10,9 +10,12 @@ export const config = {
     "/",
     "/signin",
     "/signup",
+    "/courts",
+    "/list-venue",
     "/dashboard/:path*",
     "/onboarding/:path*",
     "/player/:path*",
     "/venue-owner/:path*",
+    "/admin/:path*",
   ],
 };

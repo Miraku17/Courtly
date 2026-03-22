@@ -9,6 +9,7 @@ export async function GET() {
   const { data, error } = await supabase
     .from("venues")
     .select("*, courts(id, price_per_hour)")
+    .eq("status", "APPROVED")
     .order("created_at", { ascending: false });
 
   if (error) {

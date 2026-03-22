@@ -53,3 +53,17 @@ export const uploadVenueQRPayment = async (file: File) => {
   formData.append("file", compressed);
   return api.post("/venues/me/qr-payment", formData).then((res) => res.data);
 };
+
+export const getVenuePhotos = () =>
+  api.get("/venues/me/photos").then((res) => res.data);
+
+export const uploadVenuePhotos = async (files: File[]) => {
+  const formData = new FormData();
+  for (const file of files) {
+    formData.append("files", file);
+  }
+  return api.post("/venues/me/photos", formData).then((res) => res.data);
+};
+
+export const deleteVenuePhoto = (photoId: string) =>
+  api.delete(`/venues/me/photos?id=${photoId}`).then((res) => res.data);

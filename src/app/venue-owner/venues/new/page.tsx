@@ -79,7 +79,8 @@ export default function NewVenuePage() {
   const [closeTime, setCloseTime] = useState("10:00 PM");
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
 
-  // Step 3 — Photos
+  // Step 3 — Photos (max 10)
+  const MAX_PHOTOS = 10;
   const [photos, setPhotos] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
 
@@ -95,10 +96,22 @@ export default function NewVenuePage() {
     if (validFiles.length < files.length) {
       toast.error("Some files exceeded 5MB and were skipped");
     }
-    setPhotos((prev) => [...prev, ...validFiles]);
+
+    const remaining = MAX_PHOTOS - photos.length;
+    if (remaining <= 0) {
+      toast.error(`Maximum ${MAX_PHOTOS} photos allowed`);
+      return;
+    }
+
+    const filesToAdd = validFiles.slice(0, remaining);
+    if (filesToAdd.length < validFiles.length) {
+      toast.error(`Only ${remaining} more photo(s) allowed — some were skipped`);
+    }
+
+    setPhotos((prev) => [...prev, ...filesToAdd]);
     setPreviews((prev) => [
       ...prev,
-      ...validFiles.map((f) => URL.createObjectURL(f)),
+      ...filesToAdd.map((f) => URL.createObjectURL(f)),
     ]);
   };
 
@@ -454,39 +467,46 @@ export default function NewVenuePage() {
               className="p-6 sm:p-8 space-y-6"
             >
               <div className="space-y-2">
-                <label className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-text-muted/40">
-                  Venue Photos
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-text-muted/40">
+                    Venue Photos
+                  </label>
+                  <span className={`text-[0.7rem] font-bold tabular-nums ${photos.length >= MAX_PHOTOS ? "text-red-400" : "text-text-muted/30"}`}>
+                    {photos.length}/{MAX_PHOTOS}
+                  </span>
+                </div>
                 <p className="text-[0.8rem] text-text-muted/30">
                   Upload photos of your courts, facilities, and surroundings. Great photos attract more bookings.
                 </p>
               </div>
 
               {/* Upload Area */}
-              <label className="flex items-center justify-center rounded-xl border-2 border-dashed border-white/[0.08] bg-white/[0.02] py-12 hover:border-primary/30 hover:bg-white/[0.03] transition-colors cursor-pointer group">
-                <input
-                  type="file"
-                  accept="image/png,image/jpeg,image/webp"
-                  multiple
-                  onChange={handlePhotoUpload}
-                  className="hidden"
-                />
-                <div className="flex flex-col items-center gap-3 text-center">
-                  <ImagePlus
-                    size={32}
-                    className="text-text-muted/20 group-hover:text-primary/50 transition-colors"
+              {photos.length < MAX_PHOTOS && (
+                <label className="flex items-center justify-center rounded-xl border-2 border-dashed border-white/[0.08] bg-white/[0.02] py-12 hover:border-primary/30 hover:bg-white/[0.03] transition-colors cursor-pointer group">
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    multiple
+                    onChange={handlePhotoUpload}
+                    className="hidden"
                   />
-                  <div>
-                    <p className="text-[0.9rem] text-text-muted/40">
-                      Drag & drop or{" "}
-                      <span className="text-primary/70 font-semibold">browse</span>
-                    </p>
-                    <p className="text-[0.7rem] text-text-muted/25 mt-1">
-                      PNG, JPG, WebP up to 5MB each
-                    </p>
+                  <div className="flex flex-col items-center gap-3 text-center">
+                    <ImagePlus
+                      size={32}
+                      className="text-text-muted/20 group-hover:text-primary/50 transition-colors"
+                    />
+                    <div>
+                      <p className="text-[0.9rem] text-text-muted/40">
+                        Drag & drop or{" "}
+                        <span className="text-primary/70 font-semibold">browse</span>
+                      </p>
+                      <p className="text-[0.7rem] text-text-muted/25 mt-1">
+                        PNG, JPG, WebP up to 5MB each &middot; {MAX_PHOTOS - photos.length} remaining
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </label>
+                </label>
+              )}
 
               {/* Preview Grid */}
               {previews.length > 0 && (
@@ -501,6 +521,11 @@ export default function NewVenuePage() {
                         alt={`Venue photo ${i + 1}`}
                         className="size-full object-cover"
                       />
+                      {i === 0 && (
+                        <span className="absolute top-2 left-2 rounded-md bg-primary px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-text-dark">
+                          Cover
+                        </span>
+                      )}
                       <button
                         type="button"
                         onClick={() => removePhoto(i)}

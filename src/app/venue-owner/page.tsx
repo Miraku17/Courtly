@@ -15,6 +15,8 @@ import Link from "next/link";
 import Counter from "@/components/Counter";
 import { useQuery } from "@tanstack/react-query";
 import { getProfile } from "@/lib/api/profiles";
+import { getMyVenue } from "@/lib/api/venues";
+import { Clock, AlertTriangle } from "lucide-react";
 
 const recentBookings = [
   { id: 1, player: "Alex Martinez", email: "alex.m@mail.com", venue: "Green Valley Tennis Club", date: "Mar 19, 2026", time: "14:00 - 15:30", amount: "₱3,500", status: "confirmed" },
@@ -46,10 +48,61 @@ export default function VenueOwnerDashboard() {
     queryFn: getProfile,
   });
 
+  const { data: venueData } = useQuery({
+    queryKey: ["my-venue"],
+    queryFn: getMyVenue,
+  });
+
   const firstName = data?.profile?.first_name || "Owner";
+  const venueStatus = venueData?.venue?.status as string | undefined;
+  const adminNotes = venueData?.venue?.admin_notes as string | undefined;
 
   return (
     <div className="space-y-6">
+      {/* Venue Status Banner */}
+      {venueStatus === "PENDING" && (
+        <motion.div
+          {...fadeIn(0)}
+          className="flex items-start gap-3 rounded-2xl border border-amber-200/60 bg-amber-50/80 p-5"
+        >
+          <Clock size={20} className="text-amber-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-[0.85rem] font-bold text-amber-800">
+              Your venue is under review
+            </p>
+            <p className="text-[0.78rem] text-amber-700/70 mt-0.5 leading-relaxed">
+              It will be visible to players on the public listing once approved by our team. This usually takes 24-48 hours.
+            </p>
+          </div>
+        </motion.div>
+      )}
+
+      {venueStatus === "REJECTED" && (
+        <motion.div
+          {...fadeIn(0)}
+          className="flex items-start gap-3 rounded-2xl border border-red-200/60 bg-red-50/80 p-5"
+        >
+          <AlertTriangle size={20} className="text-red-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-[0.85rem] font-bold text-red-800">
+              Your venue was not approved
+            </p>
+            <p className="text-[0.78rem] text-red-700/70 mt-0.5 leading-relaxed">
+              {adminNotes
+                ? `Reason: ${adminNotes}. Please update your venue details and it will be reviewed again.`
+                : "Please update your venue details and it will be reviewed again."}
+            </p>
+            <Link
+              href="/venue-owner/venue"
+              className="inline-flex items-center gap-1 mt-2 text-[0.78rem] font-bold text-red-600 hover:underline"
+            >
+              Edit Venue Details
+              <ChevronRight size={14} />
+            </Link>
+          </div>
+        </motion.div>
+      )}
+
       {/* Header */}
       <motion.div
         {...fadeIn(0)}

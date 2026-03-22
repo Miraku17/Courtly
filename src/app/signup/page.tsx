@@ -18,7 +18,7 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState<"player" | "owner">("player");
+  const [role, setRole] = useState<"player" | "owner">("owner");
 
 
   const { setUser } = useAuthStore();
@@ -177,7 +177,7 @@ export default function SignUpPage() {
             </p>
           </div>
 
-          {/* Role selection toggle */}
+          {/* Role selection toggle — Player option temporarily disabled */}
           <div className="mb-6 flex p-1 bg-white/[0.03] rounded-xl border border-white/5 relative">
             <motion.div
               className="absolute bg-primary rounded-lg"
@@ -190,14 +190,17 @@ export default function SignUpPage() {
               }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             />
-            <button
+            {/* <button
               type="button"
               onClick={() => setRole("player")}
               className={`relative z-10 flex-1 py-2 text-[0.8rem] font-bold transition-colors duration-300 ${role === "player" ? "text-bg-dark" : "text-text-muted/60 hover:text-white"
                 }`}
             >
               Player
-            </button>
+            </button> */}
+            <span className="relative z-10 flex-1 py-2 text-[0.8rem] font-bold text-center text-text-muted/30 cursor-not-allowed">
+              Player <span className="text-[0.65rem] tracking-wide uppercase">(Coming Soon)</span>
+            </span>
             <button
               type="button"
               onClick={() => setRole("owner")}

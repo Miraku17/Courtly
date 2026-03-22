@@ -29,9 +29,63 @@ const clashDisplay = localFont({
   display: "swap",
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://courtify.com";
+const SITE_NAME = "Courtify";
+const DEFAULT_DESCRIPTION =
+  "Discover, book, and manage sports courts near you. Courtify connects players with premium venues and helps venue owners grow their business — all in one platform.";
+
 export const metadata: Metadata = {
-  title: "Courtify - More Than A Court",
-  description: "Join an elite community where world-class facilities meet a vibrant social scene.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Courtify — Discover & Book Sports Courts Near You",
+    template: "%s | Courtify",
+  },
+  description: DEFAULT_DESCRIPTION,
+  keywords: [
+    "sports court booking",
+    "book tennis court",
+    "book basketball court",
+    "book badminton court",
+    "book pickleball court",
+    "pickleball Cebu",
+    "Cebu pickleball courts",
+    "pickleball court booking",
+    "sports venue finder",
+    "court reservation",
+    "sports facilities near me",
+    "sports courts Cebu",
+    "venue management platform",
+    "Courtify",
+  ],
+  authors: [{ name: SITE_NAME }],
+  creator: SITE_NAME,
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: "Courtify — Discover & Book Sports Courts Near You",
+    description: DEFAULT_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Courtify — Discover & Book Sports Courts Near You",
+    description: DEFAULT_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: SITE_URL,
+  },
 };
 
 export default function RootLayout({
