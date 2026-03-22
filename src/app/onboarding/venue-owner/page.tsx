@@ -253,8 +253,13 @@ export default function VenueOwnerOnboarding() {
     tags: [] as string[],
     lat: 10.3157,
     lng: 123.8854,
+    venueRules: [] as string[],
+    safetyHealth: [] as string[],
+    cancellationPolicy: "",
   });
   const [locatingUser, setLocatingUser] = useState(false);
+  const [ruleInput, setRuleInput] = useState("");
+  const [safetyInput, setSafetyInput] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -414,6 +419,9 @@ export default function VenueOwnerOnboarding() {
         lng: formData.lng,
         operatingHours: formData.operatingHours,
         tags: formData.tags.length > 0 ? formData.tags : undefined,
+        venueRules: formData.venueRules.length > 0 ? formData.venueRules : undefined,
+        safetyHealth: formData.safetyHealth.length > 0 ? formData.safetyHealth : undefined,
+        cancellationPolicy: formData.cancellationPolicy || undefined,
       });
 
       for (const court of formData.courts) {
@@ -1020,6 +1028,124 @@ export default function VenueOwnerOnboarding() {
                               }}
                               placeholder={formData.tags.length === 0 ? "e.g. parking, floodlights, clay courts..." : ""}
                               className="flex-1 min-w-[140px] bg-transparent text-[1rem] text-white outline-none placeholder:text-white/20 py-1"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Venue Policies */}
+                        <div className="space-y-5 pt-2">
+                          <h3 className="text-[0.72rem] font-bold uppercase tracking-widest text-primary/70 ml-1">
+                            Venue Policies <span className="text-white/30 font-normal normal-case tracking-normal">(optional)</span>
+                          </h3>
+
+                          {/* Venue Rules */}
+                          <div className="space-y-2">
+                            <label className="text-[0.68rem] font-bold uppercase tracking-widest text-white/40 ml-1">
+                              Venue Rules
+                            </label>
+                            <div className="space-y-2">
+                              {formData.venueRules.map((rule, i) => (
+                                <div key={i} className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5">
+                                  <span className="flex-1 text-[0.85rem] text-white/80">{rule}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => updateFormData({ venueRules: formData.venueRules.filter((_, idx) => idx !== i) })}
+                                    className="text-white/30 hover:text-red-400 transition-colors"
+                                  >
+                                    <X size={14} />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={ruleInput}
+                                onChange={(e) => setRuleInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter" && ruleInput.trim()) {
+                                    e.preventDefault();
+                                    updateFormData({ venueRules: [...formData.venueRules, ruleInput.trim()] });
+                                    setRuleInput("");
+                                  }
+                                }}
+                                placeholder="e.g. Arrive 10 mins early"
+                                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-[0.85rem] text-white outline-none focus:border-primary/50 transition-all placeholder:text-white/20"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (ruleInput.trim()) {
+                                    updateFormData({ venueRules: [...formData.venueRules, ruleInput.trim()] });
+                                    setRuleInput("");
+                                  }
+                                }}
+                                className="flex items-center rounded-xl bg-primary/20 px-3 py-2.5 text-primary hover:bg-primary/30 transition-colors"
+                              >
+                                <Plus size={16} />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Safety & Health */}
+                          <div className="space-y-2">
+                            <label className="text-[0.68rem] font-bold uppercase tracking-widest text-white/40 ml-1">
+                              Safety & Health
+                            </label>
+                            <div className="space-y-2">
+                              {formData.safetyHealth.map((item, i) => (
+                                <div key={i} className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5">
+                                  <span className="flex-1 text-[0.85rem] text-white/80">{item}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => updateFormData({ safetyHealth: formData.safetyHealth.filter((_, idx) => idx !== i) })}
+                                    className="text-white/30 hover:text-red-400 transition-colors"
+                                  >
+                                    <X size={14} />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={safetyInput}
+                                onChange={(e) => setSafetyInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter" && safetyInput.trim()) {
+                                    e.preventDefault();
+                                    updateFormData({ safetyHealth: [...formData.safetyHealth, safetyInput.trim()] });
+                                    setSafetyInput("");
+                                  }
+                                }}
+                                placeholder="e.g. First aid kit on site"
+                                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-[0.85rem] text-white outline-none focus:border-primary/50 transition-all placeholder:text-white/20"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (safetyInput.trim()) {
+                                    updateFormData({ safetyHealth: [...formData.safetyHealth, safetyInput.trim()] });
+                                    setSafetyInput("");
+                                  }
+                                }}
+                                className="flex items-center rounded-xl bg-primary/20 px-3 py-2.5 text-primary hover:bg-primary/30 transition-colors"
+                              >
+                                <Plus size={16} />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Cancellation Policy */}
+                          <div className="space-y-2">
+                            <label className="text-[0.68rem] font-bold uppercase tracking-widest text-white/40 ml-1">
+                              Cancellation Policy
+                            </label>
+                            <textarea
+                              value={formData.cancellationPolicy}
+                              onChange={(e) => updateFormData({ cancellationPolicy: e.target.value })}
+                              placeholder="Describe your cancellation and refund policy..."
+                              className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3.5 text-[0.85rem] text-white outline-none focus:border-primary/50 transition-all min-h-[80px] resize-none leading-relaxed placeholder:text-white/20"
                             />
                           </div>
                         </div>

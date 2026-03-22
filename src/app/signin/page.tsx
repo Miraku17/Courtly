@@ -25,7 +25,9 @@ export default function SignInPage() {
       setUser({ userId: data.user.id, email: data.user.email, role: data.user.role });
       toast.success("Welcome back!");
       let destination = "/player/bookings";
-      if (data.user.role === "VENUE_OWNER") {
+      if (data.user.role === "ADMIN") {
+        destination = "/admin";
+      } else if (data.user.role === "VENUE_OWNER") {
         destination = data.user.onboardingCompleted ? "/venue-owner" : "/onboarding/venue-owner";
       }
       setTimeout(() => router.push(destination), 1000);

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-type Role = "PLAYER" | "VENUE_OWNER";
+type Role = "PLAYER" | "VENUE_OWNER" | "ADMIN";
 
 interface User {
   userId: string;

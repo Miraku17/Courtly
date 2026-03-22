@@ -108,6 +108,7 @@ npm run format           # Format with Prettier
 
 ## shadcn/ui Guidelines
 
+- **Always use shadcn/ui components first** — before building any UI element (selects, dropdowns, dialogs, buttons, inputs, etc.), check if a shadcn component exists for it. Install via CLI if not yet added (`npx shadcn@latest add <component>`). Only fall back to native HTML elements when no shadcn equivalent exists.
 - Never manually edit files inside `components/ui/` — they are managed by the shadcn CLI
 - Customize appearance via Tailwind utility classes at the usage site or via `tailwind.config.ts` theme tokens
 - Use the `cn()` utility from `lib/utils.ts` for conditional class merging

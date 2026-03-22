@@ -31,11 +31,13 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const protectedRoutes = ["/player", "/venue-owner", "/onboarding", "/dashboard"];
+  const protectedRoutes = ["/player", "/venue-owner", "/onboarding", "/dashboard", "/admin"];
   const authRoutes = ["/signin", "/signup"];
+  const publicOnlyRoutes = ["/", "/courts", "/list-venue"];
 
   const isProtected = protectedRoutes.some((route) => path.startsWith(route));
   const isAuthRoute = authRoutes.some((route) => path.startsWith(route));
+  const isPublicOnly = publicOnlyRoutes.includes(path);
 
   // Redirect unauthenticated users away from protected routes
   if (!user && isProtected) {
@@ -44,35 +46,38 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Redirect authenticated users away from auth pages
-  if (user && isAuthRoute) {
-    // Fetch role and onboarding status to determine redirect destination
+  // Fetch profile once for all authenticated route checks
+  if (user && (isAuthRoute || isPublicOnly || path.startsWith("/venue-owner") || path.startsWith("/admin"))) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role, onboarding_completed")
       .eq("id", user.id)
       .single();
 
-    let destination = "/player/bookings";
-    if (profile?.role === "VENUE_OWNER") {
-      destination = profile.onboarding_completed ? "/venue-owner" : "/onboarding/venue-owner";
+    // Redirect authenticated users away from auth & public-only pages
+    if (isAuthRoute || isPublicOnly) {
+      let destination = "/player/bookings";
+      if (profile?.role === "ADMIN") {
+        destination = "/admin";
+      } else if (profile?.role === "VENUE_OWNER") {
+        destination = profile.onboarding_completed ? "/venue-owner" : "/onboarding/venue-owner";
+      }
+      const url = request.nextUrl.clone();
+      url.pathname = destination;
+      return NextResponse.redirect(url);
     }
-    const url = request.nextUrl.clone();
-    url.pathname = destination;
-    return NextResponse.redirect(url);
-  }
 
-  // Redirect venue owners who haven't completed onboarding away from dashboard
-  if (user && path.startsWith("/venue-owner")) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("onboarding_completed")
-      .eq("id", user.id)
-      .single();
-
-    if (profile && !profile.onboarding_completed) {
+    // Redirect venue owners who haven't completed onboarding away from dashboard
+    if (path.startsWith("/venue-owner") && profile && !profile.onboarding_completed) {
       const url = request.nextUrl.clone();
       url.pathname = "/onboarding/venue-owner";
+      return NextResponse.redirect(url);
+    }
+
+    // Redirect non-admin users away from admin routes
+    if (path.startsWith("/admin") && profile?.role !== "ADMIN") {
+      const url = request.nextUrl.clone();
+      url.pathname = profile?.role === "VENUE_OWNER" ? "/venue-owner" : "/player/bookings";
       return NextResponse.redirect(url);
     }
   }

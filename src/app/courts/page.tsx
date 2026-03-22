@@ -29,6 +29,7 @@ import { Navbar } from "@/components/common/navbar";
 import { Footer } from "@/components/common/footer";
 import { PublicVenueCard, PublicVenue } from "@/components/common/public-venue-card";
 import { FadeIn } from "@/components/common/fade-in";
+import { venueSlug } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 const sportFilters = [
@@ -320,13 +321,25 @@ export default function PublicCourtsPage() {
               {/* Full-width background image */}
               <div className="relative">
                 <div className="aspect-[16/7] sm:aspect-[21/9] lg:aspect-[3/1]">
-                  <Image
-                    src={featuredVenue?.image_url || "/logo_final.png"}
-                    alt={featuredVenue.name}
-                    fill
-                    unoptimized
-                    className="object-contain p-12 transition-transform duration-700 group-hover:scale-[1.03] opacity-60"
-                  />
+                  {(() => {
+                    const featuredCover = featuredVenue.venue_photos
+                      ?.sort((a: any, b: any) => a.position - b.position)[0]?.url;
+                    const featuredImage = featuredCover || "/logo_final.png";
+                    const isFeaturedPlaceholder = !featuredCover;
+                    return (
+                      <Image
+                        src={featuredImage}
+                        alt={featuredVenue.name}
+                        fill
+                        unoptimized
+                        className={`transition-transform duration-700 group-hover:scale-[1.03] ${
+                          isFeaturedPlaceholder
+                            ? "object-contain p-12 opacity-20"
+                            : "object-cover opacity-70"
+                        }`}
+                      />
+                    );
+                  })()}
                   <div className="absolute inset-0 bg-gradient-to-t from-bg-dark via-bg-dark/60 to-bg-dark/20" />
                 </div>
 
@@ -341,9 +354,27 @@ export default function PublicCourtsPage() {
                   <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                     {/* Left: venue info */}
                     <div className="max-w-[640px]">
-                      <h2 className="mb-2 text-2xl font-extrabold text-white sm:text-3xl lg:text-4xl">
-                        {featuredVenue.name}
-                      </h2>
+                      <div className="mb-3 flex items-center gap-3">
+                        <div className="size-12 shrink-0 overflow-hidden rounded-xl border border-white/[0.1] bg-white/[0.06] sm:size-14">
+                          {featuredVenue.image_url ? (
+                            <Image
+                              src={featuredVenue.image_url}
+                              alt={`${featuredVenue.name} logo`}
+                              width={56}
+                              height={56}
+                              unoptimized
+                              className="size-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex size-full items-center justify-center text-lg font-black text-text-muted/20">
+                              {featuredVenue.name.charAt(0)}
+                            </div>
+                          )}
+                        </div>
+                        <h2 className="text-2xl font-extrabold text-white sm:text-3xl lg:text-4xl">
+                          {featuredVenue.name}
+                        </h2>
+                      </div>
 
                       <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-muted/50">
                         <span className="flex items-center gap-1.5 text-text-muted/40">
@@ -380,7 +411,7 @@ export default function PublicCourtsPage() {
                         )}
                       </div>
                       <Link
-                        href={`/player/find/${featuredVenue.id}`}
+                        href={`/courts/${venueSlug(featuredVenue.name, featuredVenue.id)}`}
                         className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-bold text-text-dark transition-all hover:brightness-110"
                       >
                         Book Now

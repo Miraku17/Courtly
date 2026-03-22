@@ -7,9 +7,9 @@ const socials = [
 ];
 
 const quickLinks = [
-  { name: "Home", href: "#" },
-  { name: "About", href: "#" },
-  { name: "Courts", href: "#" },
+  { name: "Home", href: "/" },
+  { name: "About", href: "/about" },
+  { name: "Courts", href: "/courts" },
   { name: "Pricing", href: "#" },
 ];
 

@@ -43,6 +43,9 @@ export async function PATCH(request: NextRequest) {
   if (body.lng !== undefined) updateData.lng = body.lng;
   if (body.operatingHours !== undefined) updateData.operating_hours = body.operatingHours;
   if (body.tags !== undefined) updateData.tags = body.tags;
+  if (body.venueRules !== undefined) updateData.venue_rules = body.venueRules;
+  if (body.safetyHealth !== undefined) updateData.safety_health = body.safetyHealth;
+  if (body.cancellationPolicy !== undefined) updateData.cancellation_policy = body.cancellationPolicy;
 
   const supabase = await createClient();
 

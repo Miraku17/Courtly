@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 
 const navLinks = [
+  { name: "About", href: "/about" },
   { name: "Find Courts", href: "/courts" },
   { name: "List Your Venue", href: "/list-venue" },
   { name: "Sign In", href: "/signin" },
@@ -47,6 +48,13 @@ export const Navbar = () => {
       <div className="mx-auto flex max-w-[1440px] items-center justify-between">
         {/* Desktop nav links */}
         <div className="hidden flex-1 gap-10 lg:flex">
+          <Link
+            href="/about"
+            className="flex flex-col text-[0.85rem] font-semibold uppercase leading-[1.3] tracking-[0.05em] text-[#ffffff] transition-all duration-300 hover:text-primary"
+          >
+            <span>About</span>
+            <span>Us</span>
+          </Link>
           <Link
             href="/courts"
             className="flex flex-col text-[0.85rem] font-semibold uppercase leading-[1.3] tracking-[0.05em] text-[#ffffff] transition-all duration-300 hover:text-primary"
